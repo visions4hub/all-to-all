@@ -99,7 +99,7 @@ describe("selection and editing", () => {
     expect(blurSigma(50, { width: 200, height: 100 })).toBe(1);
   });
   it("history: undo, redo, and a new change clears redo", () => {
-    let h = pushHistory("a", { past: [], future: [] });
+    let h = pushHistory<string>("a", { past: [], future: [] });
     h = pushHistory("b", h);
     const u = undoHistory("c", h);
     expect(u.value).toBe("b");

@@ -210,7 +210,7 @@ function ResizeBox({ s, onChange, disabled }: { s: PhotoSettings; onChange: (s: 
   return (
     <Section title={t({ ar: "تغيير حجم الصورة", en: "Resize image" })}>
       <div className="flex items-end gap-2">
-        <div className="flex-1">
+        <div className="min-w-0 flex-1">
           <NumberField label={t({ ar: "العرض", en: "Width" })} value={width} min={1} suffix="px" disabled={disabled} onChange={(v) => {
             setW(v);
             if (lock && v) setH(Math.max(1, Math.round((v * d.size.height) / d.size.width)));
@@ -219,7 +219,7 @@ function ResizeBox({ s, onChange, disabled }: { s: PhotoSettings; onChange: (s: 
         <Button variant={lock ? "secondary" : "outline"} size="icon-lg" className="mb-0.5 h-10" aria-pressed={lock} aria-label={t({ ar: "الحفاظ على النسبة", en: "Keep aspect ratio" })} onClick={() => setLock(!lock)}>
           {lock ? <Link2 /> : <Link2Off />}
         </Button>
-        <div className="flex-1">
+        <div className="min-w-0 flex-1">
           <NumberField label={t({ ar: "الارتفاع", en: "Height" })} value={height} min={1} suffix="px" disabled={disabled} onChange={(v) => {
             setH(v);
             if (lock && v) setW(Math.max(1, Math.round((v * d.size.width) / d.size.height)));

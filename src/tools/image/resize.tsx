@@ -70,7 +70,7 @@ function Settings({ settings: s, onChange, files, activeFile, disabled }: Settin
 
       {s.mode === "pixels" && (
         <div className="flex items-end gap-2">
-          <div className="flex-1">
+          <div className="min-w-0 flex-1">
             <NumberField label={t({ ar: "العرض", en: "Width" })} value={s.width} min={1} suffix="px" disabled={disabled} onChange={setWidth} placeholder={size ? String(size.width) : ""} />
           </div>
           <Button
@@ -86,7 +86,7 @@ function Settings({ settings: s, onChange, files, activeFile, disabled }: Settin
           >
             {s.keepRatio ? <Link2 /> : <Link2Off />}
           </Button>
-          <div className="flex-1">
+          <div className="min-w-0 flex-1">
             <NumberField label={t({ ar: "الارتفاع", en: "Height" })} value={s.height} min={1} suffix="px" disabled={disabled} onChange={setHeight} placeholder={size ? String(size.height) : ""} />
           </div>
         </div>

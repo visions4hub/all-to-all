@@ -27,7 +27,7 @@ export function Field({ label, hint, children, htmlFor }: { label: ReactNode; hi
 
 export function Section({ title, children }: { title: ReactNode; children: ReactNode }) {
   return (
-    <fieldset className="space-y-3 rounded-xl border p-3">
+    <fieldset className="min-w-0 space-y-3 rounded-xl border p-3">
       <legend className="px-1 text-xs font-semibold text-muted-foreground">{title}</legend>
       {children}
     </fieldset>
