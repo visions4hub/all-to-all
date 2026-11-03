@@ -1,0 +1,131 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { AlertTriangle, Construction, Info, Loader2, ShieldCheck } from "lucide-react";
+import { Container } from "@/components/page-shell";
+import { StatusBadge } from "@/components/status-badge";
+import { ToolGrid } from "@/components/tool-card";
+import { ToolIcon } from "@/components/tool-icon";
+import { ToolWorkspace } from "@/components/workspace/tool-workspace";
+import { Button } from "@/components/ui/button";
+import { KIND_INFO } from "@/lib/files/detect";
+import { useT } from "@/lib/i18n";
+import { getToolBySlug, isUsable, toolsInCategory } from "@/lib/tools/registry";
+import { useRecentTools } from "@/stores/recent-tools";
+import { getToolLoader } from "@/tools/load";
+import type { ToolModule } from "@/tools/types";
+
+export function ToolPage({ slug }: { slug: string }) {
+  const t = useT();
+  const tool = getToolBySlug(slug)!;
+  const usable = isUsable(tool);
+  const markUsed = useRecentTools((s) => s.markUsed);
+  const [mod, setMod] = useState<ToolModule<unknown> | null>(null);
+  const [failed, setFailed] = useState(false);
+  const loader = usable ? getToolLoader(tool.slug) : undefined;
+  // A usable tool without a module is a registry mistake; show the error state rather than spin forever.
+  const loadError = failed || (usable && !loader);
+
+  useEffect(() => {
+    if (!usable || !loader) return;
+    markUsed(tool.slug);
+    let alive = true;
+    loader()
+      .then((m) => alive && setMod(m.default))
+      .catch(() => alive && setFailed(true));
+    return () => {
+      alive = false;
+    };
+  }, [tool.slug, usable, loader, markUsed]);
+
+  const formats = [...new Set(tool.accepts.map((k) => KIND_INFO[k].label))].join(" · ");
+  const related = toolsInCategory(tool.category).filter((x) => x.id !== tool.id && isUsable(x)).slice(0, 4);
+
+  return (
+    <>
+      <section className="border-b bg-card/60">
+        <Container className="py-8 sm:py-10">
+          <nav className="mb-5 text-sm text-muted-foreground" aria-label={t({ ar: "مسار التنقل", en: "Breadcrumb" })}>
+            <Link href="/tools/" className="hover:text-foreground">
+              {t({ ar: "الأدوات", en: "Tools" })}
+            </Link>
+            <span className="mx-2">/</span>
+            <Link href={tool.category === "pdf" ? "/pdf/" : "/image/"} className="hover:text-foreground">
+              {tool.category === "pdf" ? "PDF" : t({ ar: "الصور", en: "Images" })}
+            </Link>
+          </nav>
+          <div className="flex items-start gap-4">
+            <ToolIcon name={tool.icon} category={tool.category} size="lg" />
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="text-2xl font-bold sm:text-3xl">{t(tool.name)}</h1>
+                {tool.status !== "operational" && <StatusBadge status={tool.status} />}
+              </div>
+              <p className="mt-2 max-w-2xl text-muted-foreground">{t(tool.description)}</p>
+              <p className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                <span>
+                  {t({ ar: "الصيغ المقبولة:", en: "Accepts:" })} <span dir="ltr">{formats}</span>
+                </span>
+                <span>
+                  {t({ ar: "الناتج:", en: "Output:" })} <span dir="ltr">{tool.outputs.join(" · ")}</span>
+                </span>
+                <span className="inline-flex items-center gap-1 text-teal">
+                  <ShieldCheck className="size-3.5" />
+                  {t({ ar: "بدون رفع ملفات", en: "No uploads" })}
+                </span>
+              </p>
+            </div>
+          </div>
+          {tool.note && (
+            <p className="mt-5 flex max-w-3xl items-start gap-2 rounded-xl border border-warning/30 bg-warning/8 p-3 text-sm">
+              <Info className="mt-0.5 size-4 shrink-0 text-warning" />
+              {t(tool.note)}
+            </p>
+          )}
+        </Container>
+      </section>
+
+      <Container className="py-8">
+        {!usable ? (
+          <div className="mx-auto max-w-xl rounded-2xl border bg-card p-8 text-center shadow-soft">
+            <span className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-muted text-muted-foreground">
+              <Construction className="size-7" />
+            </span>
+            <h2 className="mt-5 text-xl font-semibold">{t({ ar: "هذه الأداة قيد البناء", en: "This tool is being built" })}</h2>
+            <p className="mt-2 text-sm leading-7 text-muted-foreground">
+              {t({
+                ar: `ستُفعّل في المرحلة ${tool.milestone} من الإصدار الأول، بعد بنائها والتحقق من أن ملفاتها الناتجة صحيحة. لا نعرض أدوات وهمية.`,
+                en: `It will be switched on in milestone ${tool.milestone} of the first release, once it is built and its output is verified. We don't show fake tools.`,
+              })}
+            </p>
+            <Button asChild variant="outline" className="mt-6 rounded-xl">
+              <Link href="/tools/">{t({ ar: "تصفح الأدوات الأخرى", en: "Browse other tools" })}</Link>
+            </Button>
+          </div>
+        ) : loadError ? (
+          <div className="mx-auto flex max-w-xl items-start gap-3 rounded-2xl border border-destructive/30 bg-destructive/5 p-5 text-sm">
+            <AlertTriangle className="size-5 shrink-0 text-destructive" />
+            {t({
+              ar: "تعذّر تحميل هذه الأداة. تحقق من اتصالك ثم أعد تحميل الصفحة.",
+              en: "This tool failed to load. Check your connection and reload the page.",
+            })}
+          </div>
+        ) : !mod ? (
+          <div className="flex justify-center py-20">
+            <Loader2 className="size-6 animate-spin text-muted-foreground" />
+          </div>
+        ) : (
+          <ToolWorkspace tool={tool} module={mod} />
+        )}
+
+        {related.length > 0 && (
+          <section className="mt-16">
+            <h2 className="mb-4 text-lg font-semibold">{t({ ar: "أدوات قريبة", en: "Related tools" })}</h2>
+            <ToolGrid tools={related} compact />
+          </section>
+        )}
+      </Container>
+    </>
+  );
+}
