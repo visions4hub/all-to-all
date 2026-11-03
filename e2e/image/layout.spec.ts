@@ -10,6 +10,8 @@ const SLUGS = [
   "meme-generator",
   "blur-image",
   "photo-editor",
+  "image-metadata",
+  "gif-maker",
 ];
 
 for (const locale of ["ar", "en"] as const) {

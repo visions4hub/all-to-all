@@ -1,5 +1,6 @@
 // Heavy pixel work, run in the image worker (or on the main thread as a fallback).
 
+import { encodeGif, type GifJob } from "./gif";
 import { encodeIndexed, encodePng, quantize, type PngInfo } from "./png";
 import { applyAdjustments, gaussianBlur, pixelate, type Adjustments, type Pixels } from "./pixels";
 
@@ -9,12 +10,14 @@ export type Job =
   | { op: "blur"; px: Pixels; radius: number }
   | { op: "pixelate"; px: Pixels; block: number }
   | { op: "png"; px: Pixels }
-  | { op: "png-quantized"; px: Pixels; colors: number; dither: boolean };
+  | { op: "png-quantized"; px: Pixels; colors: number; dither: boolean }
+  | ({ op: "gif" } & GifJob);
 
 export type JobResult =
   | { op: "ping" }
   | { op: "pixels"; px: Pixels }
-  | { op: "png"; bytes: Uint8Array; info: PngInfo };
+  | { op: "png"; bytes: Uint8Array; info: PngInfo }
+  | { op: "gif"; bytes: Uint8Array };
 
 export async function runJob(job: Job): Promise<JobResult> {
   switch (job.op) {
@@ -38,12 +41,15 @@ export async function runJob(job: Job): Promise<JobResult> {
       const bytes = await encodeIndexed(indices, palette, job.px.width, job.px.height);
       return { op: "png", bytes, info: { kind: "palette", colors: palette.length / 4, bitDepth: 8 } };
     }
+    case "gif":
+      return { op: "gif", bytes: encodeGif(job) };
   }
 }
 
 /** Buffers to transfer (not copy) along with a job or result. */
 export function transferables(value: Job | JobResult): Transferable[] {
   if ("px" in value) return [value.px.data.buffer as ArrayBuffer];
+  if ("frames" in value) return value.frames.map((f) => f.data.buffer as ArrayBuffer);
   if ("bytes" in value) return [value.bytes.buffer as ArrayBuffer];
   return [];
 }
