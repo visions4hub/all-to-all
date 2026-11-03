@@ -12,6 +12,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Generated at build time (PDF.js worker copy, bundled image worker) and test output.
+    "public/vendor/**",
+    "test-results/**",
+    "playwright-report/**",
   ]),
 ]);
 

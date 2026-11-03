@@ -10,10 +10,14 @@ import type { Size } from "./geometry";
 import { runImageJob } from "./worker-client";
 
 /** Decodes an input into a canvas (optionally resized). EXIF orientation is applied. */
-export async function loadToCanvas(input: ProcessInput, size?: Size): Promise<{ canvas: HTMLCanvasElement; ctx: CanvasRenderingContext2D; src: Size }> {
+export async function loadToCanvas(
+  input: ProcessInput,
+  target?: Size | ((src: Size) => Size),
+): Promise<{ canvas: HTMLCanvasElement; ctx: CanvasRenderingContext2D; src: Size }> {
   const decoded = await decodeImage(input.file);
   try {
     const src = { width: decoded.width, height: decoded.height };
+    const size = typeof target === "function" ? target(src) : target;
     if (size && (size.width !== src.width || size.height !== src.height)) {
       const canvas = drawScaled(decoded.source, src, size);
       return { canvas, ctx: canvas.getContext("2d")!, src };

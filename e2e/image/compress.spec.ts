@@ -33,7 +33,8 @@ test.describe("Compress Image", () => {
     const diff = await imageDiff(page, input, out.buffer);
     expect(diff.sameSize).toBe(true);
     expect(diff.max).toBe(0);
-    expect(workers.length).toBeGreaterThan(0);
+    expect(workers.some((u) => u.endsWith("/vendor/image-worker.js"))).toBe(true);
+    await expect(page.locator("html")).toHaveAttribute("data-image-worker", "ready");
   });
 
   test("PNG with fewer colours is much smaller and still looks the same", async ({ page }) => {

@@ -4,4 +4,7 @@ import type { ToolModuleLoader } from "@/tools/types";
 // Each module is loaded only when its tool page opens.
 export const IMAGE_MODULES: Record<string, ToolModuleLoader> = {
   "compress-image": () => import("./compress"),
+  "resize-image": () => import("./resize"),
+  "rotate-image": () => import("./rotate"),
+  "convert-image": () => import("./convert"),
 };

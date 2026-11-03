@@ -4,12 +4,12 @@ import { throwIfCancelled } from "@/lib/engine/types";
 import { useT } from "@/lib/i18n";
 import type { SettingsProps, ToolModule } from "@/tools/types";
 import { localize } from "./lib/errors";
-import { decodeImage, getPixels, releaseCanvas } from "./lib/canvas";
+import { getPixels, releaseCanvas } from "./lib/canvas";
 import { FORMAT_INFO, resolveFormat, type FormatChoice } from "./lib/format";
 import { computeResize } from "./lib/geometry";
 import { exportCanvas, loadToCanvas, META, outputName } from "./lib/pipeline";
 import { runImageJob } from "./lib/worker-client";
-import { ColorField, Field, METADATA_NOTE, Note, NumberField, OutputFormatFields, Section, Segmented, SelectField, SliderField, SwitchField } from "./lib/ui";
+import { ColorField, Field, METADATA_NOTE, Note, NumberField, OutputFormatFields, Section, Segmented, SelectField, SwitchField } from "./lib/ui";
 
 type Preset = "high" | "balanced" | "small" | "smallest" | "custom";
 
@@ -162,13 +162,10 @@ const compress: ToolModule<CompressSettings> = {
   actionLabel: { ar: "ضغط الصور", en: "Compress" },
   async process([input], s, { signal }) {
     const format = resolveFormat(s.format, input.kind);
-    // Read the size first so a max-side limit can resize while drawing.
-    const probe = await decodeImage(input.file);
-    const src = { width: probe.width, height: probe.height };
-    probe.close();
-    const size = s.maxSide ? computeResize(src, { mode: "max", maxWidth: s.maxSide, maxHeight: s.maxSide, keepRatio: true, noUpscale: true }) : src;
-    throwIfCancelled(signal);
-    const { canvas } = await loadToCanvas(input, size);
+    const { canvas, src } = await loadToCanvas(input, (src) =>
+      s.maxSide ? computeResize(src, { mode: "max", maxWidth: s.maxSide, maxHeight: s.maxSide, keepRatio: true, noUpscale: true }) : src,
+    );
+    const size = { width: canvas.width, height: canvas.height };
     try {
       let blob: Blob;
       const meta = [META.size(size), META.format(format)];

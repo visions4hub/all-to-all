@@ -22,7 +22,8 @@ function spawn(): Promise<boolean> {
   if (ready) return ready;
   ready = new Promise<boolean>((resolve) => {
     try {
-      const w = new Worker(new URL("./image.worker.ts", import.meta.url), { type: "module" });
+      // Built by scripts/build-image-worker.mjs and served from our own origin.
+      const w = new Worker("/vendor/image-worker.js");
       const timer = setTimeout(() => {
         w.terminate();
         resolve(false);
@@ -32,6 +33,8 @@ function spawn(): Promise<boolean> {
         if (id === 0) {
           clearTimeout(timer);
           worker = w;
+          // Lets tests (and curious users) see that heavy work runs off the main thread.
+          document.documentElement.dataset.imageWorker = "ready";
           resolve(true);
           return;
         }

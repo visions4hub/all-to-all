@@ -337,9 +337,10 @@ export function OutputFormatFields({
 /** Pixel size of a workspace image (from the store, or read once). */
 export function useImageSize(file?: WorkspaceFile): Size | null {
   const [read, setRead] = useState<{ id: string; size: Size } | null>(null);
-  const known = file?.width && file?.height ? { width: file.width, height: file.height } : null;
+  const knownW = file?.width;
+  const knownH = file?.height;
   useEffect(() => {
-    if (!file || known) return;
+    if (!file || (knownW && knownH)) return;
     let alive = true;
     readImageSize(file.file)
       .then((size) => alive && setRead({ id: file.id, size }))
@@ -347,8 +348,8 @@ export function useImageSize(file?: WorkspaceFile): Size | null {
     return () => {
       alive = false;
     };
-  }, [file, known]);
-  if (known) return known;
+  }, [file, knownW, knownH]);
+  if (knownW && knownH) return { width: knownW, height: knownH };
   return read && read.id === file?.id ? read.size : null;
 }
 
