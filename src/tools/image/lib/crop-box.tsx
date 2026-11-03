@@ -47,7 +47,7 @@ export function CropBox({
     return box && box.width ? image.width / box.width : 1;
   };
 
-  const begin = (mode: "move" | Handle) => (e: ReactPointerEvent) => {
+  const begin = (mode: "move" | Handle, e: ReactPointerEvent) => {
     e.preventDefault();
     e.stopPropagation();
     try {
@@ -100,7 +100,7 @@ export function CropBox({
           tabIndex={0}
           aria-label={t({ ar: "منطقة القص — اسحبها لتحريكها، أو استخدم الأسهم", en: "Crop area — drag to move, or use the arrow keys" })}
           data-testid="crop-rect"
-          onPointerDown={begin("move")}
+          onPointerDown={(e) => begin("move", e)}
           onKeyDown={onKey}
           className="absolute cursor-move outline-none focus-visible:ring-2 focus-visible:ring-primary"
           style={{
@@ -122,7 +122,7 @@ export function CropBox({
             <span
               key={h}
               data-handle={h}
-              onPointerDown={begin(h)}
+              onPointerDown={(e) => begin(h, e)}
               className="absolute flex size-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center"
               style={{ ...style, cursor }}
             >
