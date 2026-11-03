@@ -212,11 +212,11 @@ export function HomeContent() {
         <SectionHeader
           title={{ ar: "سير عمل جاهز", en: "Workflow presets" }}
           description={{
-            ar: "سلاسل أدوات تعمل خطوة بعد خطوة على ملفاتك، دون تنزيل وإعادة إضافة الملفات بين كل أداة. (قيد البناء)",
-            en: "Tool chains that run step by step on your files, without re-adding files between tools. (In progress)",
+            ar: "سلاسل أدوات تعمل خطوة بعد خطوة على ملفاتك، دون تنزيل وإعادة إضافة الملفات بين كل أداة. اختر قالباً لفتحه جاهزاً في منشئ سير العمل.",
+            en: "Tool chains that run step by step on your files, without re-adding files between tools. Pick one to open it ready in the workflow builder.",
           }}
           href="/workflows/"
-          linkLabel={{ ar: "عن سير العمل", en: "About workflows" }}
+          linkLabel={{ ar: "أنشئ سير عملك", en: "Build your own" }}
         />
         <WorkflowPresetList />
       </Container>
