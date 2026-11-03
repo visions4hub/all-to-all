@@ -194,9 +194,13 @@ export async function fillForm(doc: PDFDocument, settings: FillSettings, rasteri
     const field = form.getField(info.name);
     const value = check.value;
     if (field instanceof lib.PDFTextField) field.setText(value as string || undefined);
-    else if (field instanceof lib.PDFCheckBox) (value ? field.check() : field.uncheck());
-    else if (field instanceof lib.PDFRadioGroup) (value ? field.select(value as string) : field.clear());
-    else if (field instanceof lib.PDFDropdown) (value ? field.select(value as string) : field.clear());
+    else if (field instanceof lib.PDFCheckBox) {
+      if (value) field.check();
+      else field.uncheck();
+    } else if (field instanceof lib.PDFRadioGroup || field instanceof lib.PDFDropdown) {
+      if (value) field.select(value as string);
+      else field.clear();
+    }
     else if (field instanceof lib.PDFOptionList) {
       const list = value as string[];
       if (list.length) field.select(list);

@@ -19,7 +19,7 @@ export const PDF_TOOLS: ToolDefinition[] = [
     outputs: ["PDF"],
     minFiles: 2,
     maxFiles: null,
-    status: "building",
+    status: "beta",
     milestone: 3,
     popular: true,
   },
@@ -38,7 +38,7 @@ export const PDF_TOOLS: ToolDefinition[] = [
     outputs: ["PDF", "ZIP"],
     minFiles: 1,
     maxFiles: null,
-    status: "building",
+    status: "beta",
     milestone: 3,
     popular: true,
   },
@@ -54,7 +54,7 @@ export const PDF_TOOLS: ToolDefinition[] = [
     outputs: ["PDF"],
     minFiles: 1,
     maxFiles: 1,
-    status: "building",
+    status: "beta",
     milestone: 3,
   },
   {
@@ -72,7 +72,7 @@ export const PDF_TOOLS: ToolDefinition[] = [
     outputs: ["PDF", "ZIP"],
     minFiles: 1,
     maxFiles: 1,
-    status: "building",
+    status: "beta",
     milestone: 3,
   },
   {
@@ -90,7 +90,7 @@ export const PDF_TOOLS: ToolDefinition[] = [
     outputs: ["PDF"],
     minFiles: 1,
     maxFiles: null,
-    status: "building",
+    status: "beta",
     milestone: 3,
   },
   {
@@ -105,7 +105,7 @@ export const PDF_TOOLS: ToolDefinition[] = [
     outputs: ["PDF"],
     minFiles: 1,
     maxFiles: null,
-    status: "building",
+    status: "beta",
     milestone: 3,
   },
   {
@@ -123,7 +123,7 @@ export const PDF_TOOLS: ToolDefinition[] = [
     outputs: ["PDF"],
     minFiles: 1,
     maxFiles: null,
-    status: "building",
+    status: "beta",
     milestone: 3,
   },
   {
@@ -138,7 +138,7 @@ export const PDF_TOOLS: ToolDefinition[] = [
     outputs: ["PDF"],
     minFiles: 1,
     maxFiles: null,
-    status: "building",
+    status: "beta",
     milestone: 3,
   },
   {
@@ -153,7 +153,7 @@ export const PDF_TOOLS: ToolDefinition[] = [
     outputs: ["PDF"],
     minFiles: 1,
     maxFiles: 1,
-    status: "building",
+    status: "beta",
     milestone: 3,
     note: {
       ar: "القص يخفي الأجزاء خارج الإطار فقط ولا يحذفها من الملف. لا تستخدمه لإخفاء معلومات حساسة.",
@@ -175,7 +175,7 @@ export const PDF_TOOLS: ToolDefinition[] = [
     outputs: ["PDF"],
     minFiles: 1,
     maxFiles: 1,
-    status: "building",
+    status: "beta",
     milestone: 3,
     note: {
       ar: "تضيف الأداة عناصر جديدة فوق الصفحة، ولا تعدّل النص الأصلي الموجود في الملف.",
@@ -197,7 +197,7 @@ export const PDF_TOOLS: ToolDefinition[] = [
     outputs: ["PDF", "ZIP"],
     minFiles: 1,
     maxFiles: null,
-    status: "building",
+    status: "beta",
     milestone: 3,
     popular: true,
   },
@@ -213,7 +213,7 @@ export const PDF_TOOLS: ToolDefinition[] = [
     outputs: ["JPG", "PNG", "ZIP"],
     minFiles: 1,
     maxFiles: null,
-    status: "building",
+    status: "beta",
     milestone: 3,
     popular: true,
     note: {
@@ -233,7 +233,7 @@ export const PDF_TOOLS: ToolDefinition[] = [
     outputs: ["TXT"],
     minFiles: 1,
     maxFiles: null,
-    status: "building",
+    status: "beta",
     milestone: 3,
     note: {
       ar: "الصفحات الممسوحة ضوئياً (صور) لا تحتوي نصاً قابلاً للاستخراج بدون تقنية OCR.",
@@ -255,7 +255,7 @@ export const PDF_TOOLS: ToolDefinition[] = [
     outputs: ["PDF"],
     minFiles: 1,
     maxFiles: 1,
-    status: "building",
+    status: "beta",
     milestone: 3,
   },
   {
@@ -273,7 +273,7 @@ export const PDF_TOOLS: ToolDefinition[] = [
     outputs: ["PDF"],
     minFiles: 1,
     maxFiles: 1,
-    status: "building",
+    status: "beta",
     milestone: 3,
     note: {
       ar: "هذا توقيع مرئي فقط، وليس توقيعاً رقمياً مشفّراً أو معتمداً قانونياً.",
