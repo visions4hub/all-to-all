@@ -156,7 +156,7 @@ export const IMAGE_TOOLS: ToolDefinition[] = [
     outputs: ["JPG", "PNG", "WebP"],
     minFiles: 1,
     maxFiles: null,
-    status: "building",
+    status: "beta",
     milestone: 2,
     note: {
       ar: "التمويه الخفيف قد يُعكس جزئياً. لإخفاء معلومات حساسة استخدم البكسلة بشدة عالية أو التغطية الكاملة.",

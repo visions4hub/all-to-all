@@ -233,3 +233,15 @@ export async function sliderTo(scope: Locator, label: RegExp, where: "min" | "ma
   await thumb.focus();
   await thumb.press(where === "max" ? "End" : "Home");
 }
+
+/** Drags between two points given as fractions of the target's box (mouse on desktop, touch on phones). */
+export async function dragFrac(page: Page, target: Locator, from: [number, number], to: [number, number]) {
+  const box = (await target.boundingBox())!;
+  const a = { x: box.x + box.width * from[0], y: box.y + box.height * from[1] };
+  const b = { x: box.x + box.width * to[0], y: box.y + box.height * to[1] };
+  if (isMobile(page)) return touchDrag(page, a, b);
+  await page.mouse.move(a.x, a.y);
+  await page.mouse.down();
+  await page.mouse.move(b.x, b.y, { steps: 8 });
+  await page.mouse.up();
+}

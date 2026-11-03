@@ -9,4 +9,5 @@ export const IMAGE_MODULES: Record<string, ToolModuleLoader> = {
   "convert-image": () => import("./convert"),
   "crop-image": () => import("./crop"),
   "watermark-image": () => import("./watermark"),
+  "blur-image": () => import("./blur"),
 };
