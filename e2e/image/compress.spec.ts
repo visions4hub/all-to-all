@@ -1,6 +1,5 @@
-import { expect, test } from "@playwright/test";
 import JSZip from "jszip";
-import { decode, downloadResult, fixture, imageDiff, makeImage, openTool, run, settings, sniff, upload, useEnglish } from "./helpers";
+import { expect, test, decode, downloadResult, fixture, imageDiff, makeImage, openTool, run, settings, sniff, upload, useEnglish } from "./helpers";
 
 const ACTION = /^(ضغط الصور|Compress)$/;
 

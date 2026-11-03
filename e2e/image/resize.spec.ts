@@ -1,6 +1,5 @@
-import { expect, test } from "@playwright/test";
 import JSZip from "jszip";
-import { decode, downloadResult, fixture, makeImage, openTool, run, settings, sniff, upload, useEnglish } from "./helpers";
+import { expect, test, decode, downloadResult, fixture, makeImage, openTool, run, settings, sniff, upload, useEnglish } from "./helpers";
 
 const ACTION = /^(تغيير الحجم|Resize)$/;
 

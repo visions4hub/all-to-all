@@ -1,5 +1,4 @@
-import { expect, test } from "@playwright/test";
-import { decode, downloadResult, fixture, makeImage, near, openTool, run, settings, sniff, upload } from "./helpers";
+import { expect, test, decode, downloadResult, fixture, makeImage, near, openTool, run, settings, sniff, upload } from "./helpers";
 
 const ACTION = /^(تدوير وحفظ|Rotate & save)$/;
 const RED = [255, 0, 0];

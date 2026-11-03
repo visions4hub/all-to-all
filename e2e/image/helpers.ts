@@ -1,8 +1,22 @@
-import { expect, type Locator, type Page } from "@playwright/test";
+import { test as base, expect, type Locator, type Page } from "@playwright/test";
 import { readFile } from "node:fs/promises";
 
 // Shared helpers for the image tool tests. Fixtures are generated in the
 // browser at test time, so nothing binary is committed to the repo.
+
+/** Playwright test that fails if the page throws any uncaught error. */
+export const test = base.extend<{ pageErrors: string[] }>({
+  pageErrors: [
+    async ({ page }, use) => {
+      const errors: string[] = [];
+      page.on("pageerror", (e) => errors.push(e.message));
+      await use(errors);
+      expect(errors, "uncaught page errors").toEqual([]);
+    },
+    { auto: true },
+  ],
+});
+export { expect };
 
 export type Fixture = { name: string; mimeType: string; buffer: Buffer };
 export type ImgFormat = "jpeg" | "png" | "webp";
@@ -211,4 +225,11 @@ export async function dragBy(page: Page, target: Locator, dx: number, dy: number
   await page.mouse.down();
   await page.mouse.move(to.x, to.y, { steps: 8 });
   await page.mouse.up();
+}
+
+/** Sets a Radix slider (found by its label) to its minimum or maximum with the keyboard. */
+export async function sliderTo(scope: Locator, label: RegExp, where: "min" | "max") {
+  const thumb = scope.getByLabel(label).getByRole("slider");
+  await thumb.focus();
+  await thumb.press(where === "max" ? "End" : "Home");
 }

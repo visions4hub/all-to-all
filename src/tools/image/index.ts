@@ -8,4 +8,5 @@ export const IMAGE_MODULES: Record<string, ToolModuleLoader> = {
   "rotate-image": () => import("./rotate"),
   "convert-image": () => import("./convert"),
   "crop-image": () => import("./crop"),
+  "watermark-image": () => import("./watermark"),
 };

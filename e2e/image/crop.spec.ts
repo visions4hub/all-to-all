@@ -1,5 +1,4 @@
-import { expect, test } from "@playwright/test";
-import { decode, dragBy, downloadResult, fixture, makeImage, openTool, run, settings, sniff, upload, useEnglish } from "./helpers";
+import { expect, test, decode, dragBy, downloadResult, fixture, makeImage, openTool, run, settings, sniff, upload, useEnglish } from "./helpers";
 
 const ACTION = /^(قص الصورة|Crop)$/;
 
