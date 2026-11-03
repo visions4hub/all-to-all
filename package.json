@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "predev": "node scripts/copy-pdf-worker.mjs && node scripts/build-image-worker.mjs",
+    "predev": "node scripts/copy-pdf-worker.mjs && node scripts/build-image-worker.mjs && node scripts/build-pdf-worker.mjs",
     "dev": "next dev",
-    "prebuild": "node scripts/copy-pdf-worker.mjs && node scripts/build-image-worker.mjs",
+    "prebuild": "node scripts/copy-pdf-worker.mjs && node scripts/build-image-worker.mjs && node scripts/build-pdf-worker.mjs",
     "build": "next build",
     "preview": "npx --yes serve out -l 4173",
     "lint": "eslint",
@@ -16,6 +16,7 @@
     "test:e2e:pdf": "playwright test -c playwright.pdf.config.ts"
   },
   "dependencies": {
+    "@neslinesli93/qpdf-wasm": "0.3.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "jszip": "^3.10.2",

@@ -3,8 +3,9 @@ import { defineConfig, devices } from "@playwright/test";
 // Browser tests for the PDF tools, run against the static build.
 //   npm run build
 //   npm run test:e2e:pdf
-// PDF_E2E_URL=http://localhost:3000 runs against a dev server instead.
-const PORT = 4174;
+// PDF_E2E_URL=http://localhost:3000 runs against a dev server instead;
+// PDF_E2E_PORT=4191 serves the build on another port (parallel sessions).
+const PORT = Number(process.env.PDF_E2E_PORT ?? 4174);
 const external = process.env.PDF_E2E_URL;
 
 export default defineConfig({

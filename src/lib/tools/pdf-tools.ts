@@ -295,7 +295,7 @@ export const PDF_TOOLS: ToolDefinition[] = [
     outputs: ["PDF"],
     minFiles: 1,
     maxFiles: null,
-    status: "building",
+    status: "operational",
     milestone: 4,
     popular: true,
     note: {
@@ -318,7 +318,7 @@ export const PDF_TOOLS: ToolDefinition[] = [
     outputs: ["HTML"],
     minFiles: 2,
     maxFiles: 2,
-    status: "building",
+    status: "operational",
     milestone: 4,
   },
 ];
