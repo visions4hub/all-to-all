@@ -1,7 +1,11 @@
 // Test helpers (imported by *.test.ts only): build fixture PDFs and read results back.
 
+import { join } from "node:path";
 import { PDFDocument, StandardFonts, degrees } from "pdf-lib";
 import type { ProcessContext, ProcessInput, ProcessOutput } from "@/lib/engine/types";
+
+// Lets PDF.js in Node read the standard 14 fonts instead of warning about them.
+const STANDARD_FONTS = join(process.cwd(), "node_modules/pdfjs-dist/standard_fonts/").split("\\").join("/");
 
 let n = 0;
 
@@ -56,7 +60,7 @@ export function nodePdfJs(): Promise<PdfJsModule> {
 export async function openWithPdfJs(bytes: Uint8Array | Blob) {
   const m = await nodePdfJs();
   const data = bytes instanceof Blob ? new Uint8Array(await bytes.arrayBuffer()) : bytes.slice();
-  return m.getDocument({ data, useSystemFonts: false }).promise;
+  return m.getDocument({ data, useSystemFonts: false, standardFontDataUrl: STANDARD_FONTS }).promise;
 }
 
 /** Text of every page, as PDF.js extracts it. */

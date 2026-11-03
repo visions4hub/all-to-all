@@ -10,13 +10,14 @@ A free PDF and image toolbox that runs entirely in the browser. No accounts, no 
 npm install
 npm run dev        # http://localhost:3000
 npm test           # unit tests (Vitest)
+npm run test:e2e   # browser tests (Playwright) against the static build; run `npm run build` first
 npm run typecheck
 npm run lint
 npm run build      # static site in out/
 npm run preview    # serve out/ on http://localhost:4173
 ```
 
-Node 20 or newer. `predev` / `prebuild` copy the PDF.js worker into `public/vendor/` so it is served from our own origin.
+Node 20 or newer. `predev` / `prebuild` copy the PDF.js worker and its font/cmap/decoder data into `public/vendor/` and bundle the image worker, so everything is served from our own origin. First time only: `npx playwright install chromium`.
 
 ## Deploy (static, free tier)
 
@@ -33,7 +34,7 @@ Limits change; check the provider's current terms before relying on them. A cust
 ## How it is built
 
 - **Next.js 16** App Router with `output: "export"`, React 19, TypeScript, Tailwind CSS 4, shadcn/ui (Radix), Lucide icons, Zustand.
-- **PDF.js** (Apache-2.0) for rendering, **pdf-lib** (MIT, arrives with the PDF tools), **JSZip** (MIT/GPLv3 dual — used under MIT).
+- **PDF.js** (Apache-2.0) for rendering, **pdf-lib** (MIT), **JSZip** (MIT/GPLv3 dual — used under MIT).
 - Fonts (IBM Plex Sans Arabic, Readex Pro — OFL) are downloaded at build time and self-hosted.
 
 ```

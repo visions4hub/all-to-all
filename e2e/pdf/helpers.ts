@@ -1,9 +1,13 @@
 import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 import { expect, type Download, type Page } from "@playwright/test";
 import JSZip from "jszip";
 import { PDFDict, PDFDocument, PDFName, StandardFonts, degrees } from "pdf-lib";
 
 export type Locale = "ar" | "en";
+
+// Lets PDF.js in Node read the standard 14 fonts instead of warning about them.
+const STANDARD_FONTS = join(process.cwd(), "node_modules/pdfjs-dist/standard_fonts/").split("\\").join("/");
 
 /** Opens a tool page with the chosen language (stored like the site stores it). */
 export async function openTool(page: Page, slug: string, locale: Locale = "ar") {
@@ -115,7 +119,7 @@ let pdfjs: Promise<PdfJs> | null = null;
 export async function pageTexts(bytes: Uint8Array): Promise<string[]> {
   pdfjs ??= import("pdfjs-dist/legacy/build/pdf.mjs") as Promise<PdfJs>;
   const m = await pdfjs;
-  const doc = await m.getDocument({ data: new Uint8Array(bytes), useSystemFonts: false }).promise;
+  const doc = await m.getDocument({ data: new Uint8Array(bytes), useSystemFonts: false, standardFontDataUrl: STANDARD_FONTS }).promise;
   const out: string[] = [];
   for (let i = 1; i <= doc.numPages; i++) {
     const c = await (await doc.getPage(i)).getTextContent();

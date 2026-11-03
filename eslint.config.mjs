@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Session worktrees live here; they are separate checkouts, not part of this one.
+    ".claude/**",
     // Generated at build time (PDF.js worker copy, bundled image worker) and test output.
     "public/vendor/**",
     "test-results/**",

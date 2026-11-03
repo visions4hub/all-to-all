@@ -16,6 +16,16 @@ export function loadPdfJs(): Promise<PdfJs> {
   return pdfjsPromise;
 }
 
+// Data PDF.js fetches on demand, copied to public/vendor/pdfjs by scripts/copy-pdf-worker.mjs.
+// Without it, PDFs that don't embed their fonts (or use CJK encodings, JPEG 2000, CMYK) render wrongly.
+const PDFJS_RESOURCES = {
+  standardFontDataUrl: "/vendor/pdfjs/standard_fonts/",
+  cMapUrl: "/vendor/pdfjs/cmaps/",
+  cMapPacked: true,
+  wasmUrl: "/vendor/pdfjs/wasm/",
+  iccUrl: "/vendor/pdfjs/iccs/",
+};
+
 export type PdfOpenErrorCode = "password" | "invalid" | "unknown";
 
 export class PdfOpenError extends Error {
@@ -31,7 +41,7 @@ export async function openPdf(data: ArrayBuffer | Uint8Array) {
   // PDF.js takes ownership of the buffer, so pass a copy to keep the caller's intact.
   const bytes = data instanceof Uint8Array ? data.slice() : new Uint8Array(data.slice(0));
   try {
-    return await pdfjs.getDocument({ data: bytes }).promise;
+    return await pdfjs.getDocument({ data: bytes, ...PDFJS_RESOURCES }).promise;
   } catch (error) {
     const name = (error as { name?: string })?.name;
     if (name === "PasswordException") throw new PdfOpenError("password", "This PDF is password-protected.");
