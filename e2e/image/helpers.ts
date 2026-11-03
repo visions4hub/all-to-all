@@ -187,3 +187,28 @@ export async function imageDiff(page: Page, a: Buffer, b: Buffer, region?: { x: 
 export function near(actual: number[], expected: number[], tolerance = 16) {
   return actual.every((v, i) => Math.abs(v - expected[i]) <= tolerance);
 }
+
+/** A real touch drag (Chrome DevTools touch events → pointer events with pointerType "touch"). */
+export async function touchDrag(page: Page, from: { x: number; y: number }, to: { x: number; y: number }, steps = 8) {
+  const cdp = await page.context().newCDPSession(page);
+  const point = (p: { x: number; y: number }) => [{ x: Math.round(p.x), y: Math.round(p.y), id: 1 }];
+  await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: point(from) });
+  for (let i = 1; i <= steps; i++) {
+    const p = { x: from.x + ((to.x - from.x) * i) / steps, y: from.y + ((to.y - from.y) * i) / steps };
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: point(p) });
+  }
+  await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+  await cdp.detach();
+}
+
+/** Mouse drag on desktop, touch drag on phones. */
+export async function dragBy(page: Page, target: Locator, dx: number, dy: number, offset = { x: 0, y: 0 }) {
+  const box = (await target.boundingBox())!;
+  const from = { x: box.x + box.width / 2 + offset.x, y: box.y + box.height / 2 + offset.y };
+  const to = { x: from.x + dx, y: from.y + dy };
+  if (isMobile(page)) return touchDrag(page, from, to);
+  await page.mouse.move(from.x, from.y);
+  await page.mouse.down();
+  await page.mouse.move(to.x, to.y, { steps: 8 });
+  await page.mouse.up();
+}

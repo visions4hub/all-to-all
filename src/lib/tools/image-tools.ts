@@ -56,7 +56,7 @@ export const IMAGE_TOOLS: ToolDefinition[] = [
     outputs: ["JPG", "PNG", "WebP"],
     minFiles: 1,
     maxFiles: 1,
-    status: "building",
+    status: "beta",
     milestone: 2,
   },
   {

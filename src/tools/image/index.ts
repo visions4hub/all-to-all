@@ -7,4 +7,5 @@ export const IMAGE_MODULES: Record<string, ToolModuleLoader> = {
   "resize-image": () => import("./resize"),
   "rotate-image": () => import("./rotate"),
   "convert-image": () => import("./convert"),
+  "crop-image": () => import("./crop"),
 };
