@@ -217,6 +217,7 @@ export async function touchDrag(page: Page, from: { x: number; y: number }, to: 
 
 /** Mouse drag on desktop, touch drag on phones. */
 export async function dragBy(page: Page, target: Locator, dx: number, dy: number, offset = { x: 0, y: 0 }) {
+  await target.scrollIntoViewIfNeeded();
   const box = (await target.boundingBox())!;
   const from = { x: box.x + box.width / 2 + offset.x, y: box.y + box.height / 2 + offset.y };
   const to = { x: from.x + dx, y: from.y + dy };
@@ -236,6 +237,7 @@ export async function sliderTo(scope: Locator, label: RegExp, where: "min" | "ma
 
 /** Drags between two points given as fractions of the target's box (mouse on desktop, touch on phones). */
 export async function dragFrac(page: Page, target: Locator, from: [number, number], to: [number, number]) {
+  await target.scrollIntoViewIfNeeded();
   const box = (await target.boundingBox())!;
   const a = { x: box.x + box.width * from[0], y: box.y + box.height * from[1] };
   const b = { x: box.x + box.width * to[0], y: box.y + box.height * to[1] };
@@ -244,4 +246,30 @@ export async function dragFrac(page: Page, target: Locator, from: [number, numbe
   await page.mouse.down();
   await page.mouse.move(b.x, b.y, { steps: 8 });
   await page.mouse.up();
+}
+
+/** Closes the phone settings sheet if it is open. */
+export async function closeSettings(page: Page) {
+  const dialog = page.getByRole("dialog");
+  if (await dialog.isVisible()) {
+    await page.keyboard.press("Escape");
+    await expect(dialog).toBeHidden();
+  }
+}
+
+/** Two-finger pinch (spread) with real touch events. */
+export async function pinchOut(page: Page, target: Locator) {
+  await target.scrollIntoViewIfNeeded();
+  const box = (await target.boundingBox())!;
+  const cx = box.x + box.width / 2;
+  const cy = box.y + box.height / 2;
+  const cdp = await page.context().newCDPSession(page);
+  const pts = (d: number) => [
+    { x: Math.round(cx - d), y: Math.round(cy), id: 1 },
+    { x: Math.round(cx + d), y: Math.round(cy), id: 2 },
+  ];
+  await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: pts(20) });
+  for (let d = 25; d <= 80; d += 5) await cdp.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: pts(d) });
+  await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+  await cdp.detach();
 }

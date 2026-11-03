@@ -11,4 +11,5 @@ export const IMAGE_MODULES: Record<string, ToolModuleLoader> = {
   "watermark-image": () => import("./watermark"),
   "blur-image": () => import("./blur"),
   "meme-generator": () => import("./meme"),
+  "photo-editor": () => import("./photo-editor"),
 };

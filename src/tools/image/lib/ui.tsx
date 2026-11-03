@@ -138,10 +138,13 @@ export function SliderField({
   format,
   disabled,
   hint,
+  onCommit,
 }: {
   label: ReactNode;
   value: number;
   onChange: (v: number) => void;
+  /** Called when a drag or key press ends (for one undo step per change). */
+  onCommit?: (v: number) => void;
   min: number;
   max: number;
   step?: number;
@@ -170,6 +173,7 @@ export function SliderField({
         step={step}
         disabled={disabled}
         onValueChange={(v) => onChange(v[0])}
+        onValueCommit={onCommit ? (v) => onCommit(v[0]) : undefined}
         className="py-2"
       />
       {hint && <p className="text-xs leading-5 text-muted-foreground">{hint}</p>}
