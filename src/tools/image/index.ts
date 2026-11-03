@@ -10,4 +10,5 @@ export const IMAGE_MODULES: Record<string, ToolModuleLoader> = {
   "crop-image": () => import("./crop"),
   "watermark-image": () => import("./watermark"),
   "blur-image": () => import("./blur"),
+  "meme-generator": () => import("./meme"),
 };
