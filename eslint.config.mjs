@@ -12,6 +12,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Generated: PDF.js worker copied by scripts/copy-pdf-worker.mjs; test output.
+    "public/vendor/**",
+    "test-results/**",
+    "playwright-report/**",
   ]),
 ]);
 

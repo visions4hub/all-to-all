@@ -344,20 +344,27 @@ export function OverlayEditor({
             </Button>
           </span>
         </div>
-        {tool !== "select" && tool !== "image" && (
-          <div className="flex flex-wrap items-center gap-3 text-xs">
-            <span className="text-muted-foreground">
-              {tool === "text" ? t({ ar: "اضغط على الصفحة لإضافة نص", en: "Tap the page to add text" }) : t({ ar: "اسحب على الصفحة للرسم", en: "Drag on the page to draw" })}
-            </span>
-            {tool !== "highlight" && <ColorField value={style.color} onChange={(color) => setStyle({ ...style, color })} ariaLabel={t({ ar: "اللون", en: "Colour" })} />}
-            {tool !== "text" && tool !== "highlight" && (
-              <label className="flex items-center gap-1.5">
-                {t({ ar: "السماكة", en: "Width" })}
-                <input type="range" min={0.5} max={12} step={0.5} value={style.strokeWidth} onChange={(e) => setStyle({ ...style, strokeWidth: Number(e.target.value) })} className="w-24 accent-[var(--primary)]" />
-              </label>
-            )}
-          </div>
-        )}
+        {/* Fixed height, so switching tools never shifts the page under the pointer. */}
+        <div className="flex min-h-10 flex-wrap items-center gap-3 text-xs">
+          <span className="text-muted-foreground">
+            {tool === "select"
+              ? t({ ar: "اضغط على عنصر لتحديده، واسحبه لنقله", en: "Tap an object to select it; drag to move it" })
+              : tool === "text"
+                ? t({ ar: "اضغط على الصفحة لإضافة نص", en: "Tap the page to add text" })
+                : tool === "image"
+                  ? t({ ar: "اختر صورة لإضافتها", en: "Choose an image to add" })
+                  : t({ ar: "اسحب على الصفحة للرسم", en: "Drag on the page to draw" })}
+          </span>
+          {tool !== "select" && tool !== "image" && tool !== "highlight" && (
+            <ColorField value={style.color} onChange={(color) => setStyle({ ...style, color })} ariaLabel={t({ ar: "اللون", en: "Colour" })} />
+          )}
+          {tool !== "select" && tool !== "image" && tool !== "text" && tool !== "highlight" && (
+            <label className="flex items-center gap-1.5">
+              {t({ ar: "السماكة", en: "Width" })}
+              <input type="range" min={0.5} max={12} step={0.5} value={style.strokeWidth} onChange={(e) => setStyle({ ...style, strokeWidth: Number(e.target.value) })} className="w-24 accent-[var(--primary)]" />
+            </label>
+          )}
+        </div>
       </div>
 
       <input
@@ -378,7 +385,8 @@ export function OverlayEditor({
         }}
       />
 
-      <div className={cn("grid gap-3", selected && "xl:grid-cols-[minmax(0,1fr)_240px]")}>
+      {/* Properties sit below the page, so the page never moves or shrinks when something is selected. */}
+      <div className="space-y-3">
         <RenderedPage source={file} page={shown + 1} maxHeight={900} onSize={setSize}>
           {size && (
             <svg
