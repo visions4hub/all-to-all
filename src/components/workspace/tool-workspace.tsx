@@ -210,7 +210,7 @@ export function ToolWorkspace<S>({ tool, module }: { tool: ToolDefinition; modul
       )}
 
       {/* Mobile: sticky action bar + settings bottom sheet */}
-      <div className="sticky bottom-0 z-30 -mx-4 border-t bg-background/95 px-4 py-3 backdrop-blur lg:hidden">
+      <div className="sticky bottom-0 z-30 -mx-4 border-t bg-background/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur lg:hidden">
         <div className="flex gap-2">
           {settingsPanel && (
             <Button variant="outline" className="h-12 rounded-xl" onClick={() => setSheetOpen(true)} disabled={running}>
@@ -222,7 +222,7 @@ export function ToolWorkspace<S>({ tool, module }: { tool: ToolDefinition; modul
         </div>
       </div>
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        <SheetContent side="bottom" className="max-h-[85vh] overflow-y-auto rounded-t-3xl p-5 pb-8">
+        <SheetContent side="bottom" className="max-h-[85vh] overflow-y-auto rounded-t-3xl p-5 pb-[max(2rem,calc(env(safe-area-inset-bottom)+1rem))] supports-[height:100dvh]:max-h-[85dvh]">
           <SheetTitle>{t({ ar: "الإعدادات", en: "Settings" })}</SheetTitle>
           {settingsPanel}
           {actionButton}
