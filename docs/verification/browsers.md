@@ -40,7 +40,9 @@ Full runs of all 670 tests:
 |---|---|
 | 1 | 662 passed, 8 skipped, 0 failed (9.7 min) |
 | 2 | 661 passed, 8 skipped, 1 failed — see "Flake" below (11.3 min) |
-| 3 | see bottom of this file |
+| 3 | 662 passed, 8 skipped, 0 failed (15.9 min) |
+| 4 (after the GIF drag fix, final) | 662 passed, 8 skipped, 0 failed (9.9 min) |
+| PDF-only config (`test:e2e:pdf:all`, 215 tests) | 211 passed, 4 skipped, 0 failed |
 
 Other checks on the branch: `npm run typecheck` clean, `npm run lint` clean, `npm test` 394 passed (27 files), `npm run build` OK.
 
@@ -54,7 +56,9 @@ Before this work (Chromium-only tests, first run on the new browsers): 371 passe
    Image recompression needs `OffscreenCanvas` in the worker. Without it (Safari before 16.4, and Playwright's WebKit build) the switch silently did nothing and the result said "already well compressed". Now: a warning under the switch before running, a distinct `imagesSkipped: "browser"` reason, and a result note that is shown even when the original file is returned. Unit test added in `compress.test.ts`.
 3. **WebP output warns up front where it can't be saved** — `src/tools/image/lib/ui.tsx` (`OutputFormatFields`, new `useCanEncode`).
    Safari's `canvas.toBlob("image/webp")` silently returns a PNG. The engine already refused with "This browser can't save images as WebP…"; the format picker now also shows that warning as soon as WebP is chosen (the existing, unused `canEncode()` check is now used). Affects every image tool and workflow step that uses the shared format picker.
-4. **Phone settings bar and sheet** — `src/components/workspace/tool-workspace.tsx`.
+4. **GIF Maker: dragged frame dropped on the wrong frame** — `src/tools/image/gif.tsx`.
+   The drop target came from the last `pointermove`. WebKit can coalesce that last move away before `pointerup`, so a diagonal drag (frames wrap into rows) dropped onto the frame it last passed over — 2 of 15 runs in WebKit desktop, also seen once on the merged tree. The drop index is now taken from the `pointerup` position. After the fix: GIF spec ×10 in all five projects, 200 / 200 passed.
+5. **Phone settings bar and sheet** — `src/components/workspace/tool-workspace.tsx`.
    Sticky bottom bar and bottom sheet get `env(safe-area-inset-bottom)` padding; the sheet's height cap is `85dvh` where supported (85vh could run under Safari's bottom toolbar). Note: the site doesn't set `viewport-fit=cover`, so iOS keeps content out of the home-indicator area itself and the inset is 0 today; the padding makes the bars correct if `cover` is ever turned on.
 
 ## Browser capability gaps and how they are handled
@@ -87,6 +91,10 @@ Before this work (Chromium-only tests, first run on the new browsers): 371 passe
 ## Manual / screenshot check (WebKit iPhone 13 and Firefox 1366 px, Arabic)
 
 Homepage, Compress Image with an Arabic filename (`صورة الرحلة إلى بغداد 2024 النهائية.png`), its settings bottom sheet, Photo Editor and Workflow builder: correct `dir="rtl"`, IBM Plex Sans Arabic loaded, no horizontal scroll, sticky action bar and bottom sheet placed correctly, filename and `.png` extension shown in the right order, no page errors.
+
+## Merge check with `main` (4223939: security headers + CSP)
+
+`git merge-tree` shows no conflicts. The merged tree (a detached trial commit, not on any branch) was built and run in all five projects with `main`'s CSP-enforcing `e2e/serve.mjs` and `security.spec.ts`: 696 passed, 8 skipped, 1 failed — the GIF drag above, fixed afterwards. No CSP problems in Firefox or WebKit.
 
 ## Flake
 
