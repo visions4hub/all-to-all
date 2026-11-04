@@ -91,7 +91,7 @@ test("edit PDF: rectangle, Latin text, Arabic text, undo", async ({ page }) => {
 });
 
 test("edit PDF: freehand, arrow, highlight, delete with keyboard", async ({ page }) => {
-  test.skip(test.info().project.name === "mobile", "Keyboard delete is a desktop shortcut; touch uses the delete button.");
+  test.skip(!!test.info().project.use.isMobile, "Keyboard delete is a desktop shortcut; touch uses the delete button.");
   await openTool(page, "edit-pdf", "en");
   await upload(page, [pdfUpload("doc.pdf", await makePdf(1))]);
   const area = page.getByRole("application", { name: "Editing area" });

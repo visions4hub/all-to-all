@@ -1,5 +1,5 @@
 import type { Page } from "@playwright/test";
-import { expect, test, closeSettings, decode, dragFrac, downloadResult, fixture, imageDiff, isMobile, makeImage, near, openTool, pinchOut, run, settings, sliderTo, sniff, upload, useEnglish } from "./helpers";
+import { expect, test, canTouchDrag, closeSettings, decode, dragFrac, downloadResult, fixture, imageDiff, isMobile, makeImage, near, openTool, pinchOut, run, settings, sliderTo, sniff, upload, useEnglish } from "./helpers";
 
 const ACTION = /^(حفظ الصورة|Save image)$/;
 const RED = [255, 0, 0];
@@ -160,6 +160,10 @@ test.describe("Photo Editor", () => {
 
   test("pinch to zoom on a touch screen", async ({ page }) => {
     test.skip(!isMobile(page), "touch only");
+    test.skip(
+      !canTouchDrag(page),
+      "Playwright can only send multi-touch (pinch) in Chromium (DevTools Input.dispatchTouchEvent); WebKit and Firefox have no multi-touch input API. Pinch is covered by the Chromium mobile project.",
+    );
     await open(page, { width: 400, height: 300, pattern: "photo" });
     await pinchOut(page, canvas(page).locator(".."));
     await expect.poll(async () => Number((await page.getByTestId("editor-zoom").textContent())!.replace("%", ""))).toBeGreaterThan(150);

@@ -87,7 +87,7 @@ test("crop: numeric margins set the CropBox; content is kept", async ({ page }) 
 });
 
 test("crop: dragging the box changes the margins", async ({ page }) => {
-  test.skip(test.info().project.name === "mobile", "Drag is covered on desktop; phones use the same pointer events.");
+  test.skip(!!test.info().project.use.isMobile, "Drag is covered on desktop; phones use the same pointer events.");
   await openTool(page, "crop-pdf", "en");
   await upload(page, [pdfUpload("doc.pdf", await makeRotatedPdf())]);
   const area = page.getByRole("group", { name: "Crop area" });
