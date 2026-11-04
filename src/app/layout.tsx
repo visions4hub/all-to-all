@@ -3,6 +3,7 @@ import { IBM_Plex_Sans_Arabic, Readex_Pro } from "next/font/google";
 import { AppProviders } from "@/components/app-providers";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { META_CSP } from "@/lib/security/csp";
 import "./globals.css";
 
 // Fonts are downloaded at build time and served from our own origin.
@@ -49,6 +50,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ar" dir="rtl" className={`${body.variable} ${display.variable} h-full antialiased`} suppressHydrationWarning>
       <head>
+        {/* First in <head> so it covers everything after it; works on hosts that can't set headers. */}
+        <meta httpEquiv="Content-Security-Policy" content={META_CSP} />
+        <meta name="referrer" content="no-referrer" />
         <script dangerouslySetInnerHTML={{ __html: prefsScript }} />
       </head>
       <body className="flex min-h-full flex-col">

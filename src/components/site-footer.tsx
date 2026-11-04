@@ -12,6 +12,7 @@ const SITE_LINKS: { href: string; label: Localized }[] = [
   { href: "/help/", label: { ar: "المساعدة", en: "Help" } },
   { href: "/privacy/", label: { ar: "الخصوصية", en: "Privacy" } },
   { href: "/terms/", label: { ar: "شروط الاستخدام", en: "Terms" } },
+  { href: "/third-party-notices.txt", label: { ar: "تراخيص المكتبات المفتوحة", en: "Open-source licenses" } },
 ];
 
 export function SiteFooter() {

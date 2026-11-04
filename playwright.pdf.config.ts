@@ -24,7 +24,7 @@ export default defineConfig({
   webServer: external
     ? undefined
     : {
-        command: `node e2e/pdf/static-server.mjs ${PORT}`,
+        command: `node e2e/serve.mjs ${PORT}`,
         url: `http://localhost:${PORT}`,
         reuseExistingServer: true,
       },

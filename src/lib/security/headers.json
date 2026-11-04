@@ -1,0 +1,33 @@
+{
+  "$comment": "Single source for the site's security headers. Used by src/app/layout.tsx (CSP <meta>, works on any static host) and scripts/build-headers.mjs (public/_headers for hosts that read it, e.g. Cloudflare Pages). Every file is processed in the browser: connect-src 'self' means the page itself cannot send data to any other server.",
+  "csp": {
+    "default-src": ["'self'"],
+    "script-src": ["'self'", "'unsafe-inline'", "'wasm-unsafe-eval'"],
+    "worker-src": ["'self'", "blob:"],
+    "style-src": ["'self'", "'unsafe-inline'"],
+    "img-src": ["'self'", "blob:", "data:"],
+    "font-src": ["'self'", "data:"],
+    "connect-src": ["'self'", "blob:", "data:"],
+    "media-src": ["'self'", "blob:", "data:"],
+    "manifest-src": ["'self'"],
+    "frame-src": ["'none'"],
+    "object-src": ["'none'"],
+    "base-uri": ["'self'"],
+    "form-action": ["'self'"]
+  },
+  "cspHeaderOnly": {
+    "frame-ancestors": ["'none'"]
+  },
+  "headers": {
+    "X-Content-Type-Options": "nosniff",
+    "Referrer-Policy": "no-referrer",
+    "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=(), usb=()",
+    "Cross-Origin-Opener-Policy": "same-origin",
+    "Cross-Origin-Resource-Policy": "same-origin",
+    "X-Frame-Options": "DENY"
+  },
+  "cache": {
+    "/_next/static/*": "public, max-age=31536000, immutable",
+    "/vendor/*": "public, max-age=3600, must-revalidate"
+  }
+}

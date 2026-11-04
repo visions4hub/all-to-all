@@ -40,6 +40,32 @@ async function resolve(urlPath) {
   }
 }
 
+// Apply out/_headers (Cloudflare Pages format) so tests run under the real security headers.
+function parseHeaders(text) {
+  const rules = [];
+  let current = null;
+  for (const raw of text.split(/\r?\n/)) {
+    if (!raw.trim() || raw.trim().startsWith("#")) continue;
+    if (!/^\s/.test(raw)) {
+      current = { pattern: raw.trim(), headers: {} };
+      rules.push(current);
+    } else if (current) {
+      const i = raw.indexOf(":");
+      current.headers[raw.slice(0, i).trim()] = raw.slice(i + 1).trim();
+    }
+  }
+  return rules;
+}
+const headerRules = await readFile(join(root, "_headers"), "utf8").then(parseHeaders, () => []);
+function headersFor(urlPath) {
+  const out = {};
+  for (const rule of headerRules) {
+    const prefix = rule.pattern.replace(/\*$/, "");
+    if (rule.pattern.endsWith("*") ? urlPath.startsWith(prefix) : urlPath === rule.pattern) Object.assign(out, rule.headers);
+  }
+  return out;
+}
+
 createServer(async (req, res) => {
   const file = await resolve(req.url || "/");
   if (!file) {
@@ -48,6 +74,9 @@ createServer(async (req, res) => {
     return;
   }
   const body = await readFile(file);
-  res.writeHead(200, { "content-type": TYPES[extname(file)] || "application/octet-stream" });
+  res.writeHead(200, {
+    ...headersFor((req.url || "/").split("?")[0]),
+    "content-type": TYPES[extname(file)] || "application/octet-stream",
+  });
   res.end(body);
 }).listen(port, () => console.log(`serving out/ on http://localhost:${port}`));
