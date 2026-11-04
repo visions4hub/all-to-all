@@ -110,7 +110,7 @@ export function HomeContent() {
             <ShieldCheck className="size-4 text-gold" />
             {t({ ar: "معالجة كاملة داخل متصفحك", en: "Processed entirely in your browser" })}
           </p>
-          <h1 className="mx-auto max-w-3xl text-4xl leading-[1.25] font-bold text-balance sm:text-5xl sm:leading-[1.2] lg:text-6xl">
+          <h1 className="mx-auto max-w-3xl text-4xl leading-[1.55] font-bold text-balance sm:text-5xl sm:leading-[1.5] lg:text-6xl">
             {locale === "ar" ? (
               <>
                 <span className="inline-block">كل ملفاتك.</span> <span className="inline-block">كل أدواتك.</span>{" "}

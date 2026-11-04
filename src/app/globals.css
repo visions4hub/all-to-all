@@ -7,8 +7,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-body), var(--font-display), system-ui, sans-serif;
-  --font-heading: var(--font-display), var(--font-body), system-ui, sans-serif;
+  --font-sans: var(--font-body), system-ui, sans-serif;
+  --font-heading: var(--font-display), Georgia, serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
   --color-gold: var(--gold);
   --color-ring: var(--ring);
@@ -101,7 +101,11 @@
   h3,
   h4 {
     font-family: var(--font-heading);
-    letter-spacing: -0.01em;
+    /* Amiri's tall ascenders and descenders need room; Arabic must never be letter-spaced.
+       Tailwind's text-* sizes read --tw-leading first, so this reaches every heading,
+       while an explicit leading-* class on a heading still wins. */
+    --tw-leading: 1.5;
+    line-height: 1.5;
   }
   button:not(:disabled),
   [role="button"]:not(:disabled) {

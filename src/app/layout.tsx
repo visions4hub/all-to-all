@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { IBM_Plex_Sans_Arabic, Readex_Pro } from "next/font/google";
+import { Amiri, IBM_Plex_Sans_Arabic } from "next/font/google";
 import { AppProviders } from "@/components/app-providers";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
@@ -14,10 +14,11 @@ const body = IBM_Plex_Sans_Arabic({
   display: "swap",
 });
 
-const display = Readex_Pro({
+// Headings: Amiri, a classical Naskh with a matching Latin serif (OFL).
+const display = Amiri({
   variable: "--font-display",
   subsets: ["arabic", "latin"],
-  weight: ["500", "600", "700"],
+  weight: ["400", "700"],
   display: "swap",
 });
 
