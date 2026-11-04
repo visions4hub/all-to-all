@@ -13,7 +13,7 @@ npm run build
 npx wrangler@4 pages deploy out --project-name all-to-all --branch main
 ```
 
-The project was created as Direct Upload, so pushing to GitHub does not redeploy by itself. To deploy automatically on every push, add a GitHub Actions step that runs the command above with a Cloudflare API token stored as a repository secret (`CLOUDFLARE_API_TOKEN`, scoped to "Cloudflare Pages: Edit", plus `CLOUDFLARE_ACCOUNT_ID`).
+**Automatic deploys:** every push to `main` runs CI (`.github/workflows/ci.yml`); when every check passes, the `deploy` job publishes the exact tested build with Wrangler. It uses the repository secret `CLOUDFLARE_API_TOKEN` (a Cloudflare API token with *Account → Cloudflare Pages → Edit*; save only the token itself, one word, not the `curl` test command) and the repository variable `CLOUDFLARE_ACCOUNT_ID`. If any check fails, nothing is published and the live site keeps the last good version.
 
 ## Recommended: Cloudflare Pages (free plan)
 
