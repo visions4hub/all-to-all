@@ -10,14 +10,15 @@ A free PDF and image toolbox that runs entirely in the browser. No accounts, no 
 npm install
 npm run dev        # http://localhost:3000
 npm test           # unit tests (Vitest)
-npm run test:e2e   # browser tests (Playwright) against the static build; run `npm run build` first
+npm run test:e2e   # browser tests (Playwright, Chromium desktop + phone) against the static build; run `npm run build` first
+npm run test:e2e:all  # same tests in Chromium, Firefox, desktop Safari and iPhone Safari (WebKit)
 npm run typecheck
 npm run lint
 npm run build      # static site in out/
 npm run preview    # serve out/ on http://localhost:4173
 ```
 
-Node 20 or newer. `predev` / `prebuild` copy the PDF.js worker and its font/cmap/decoder data into `public/vendor/` and bundle the image worker, so everything is served from our own origin. First time only: `npx playwright install chromium`.
+Node 20 or newer. `predev` / `prebuild` copy the PDF.js worker and its font/cmap/decoder data into `public/vendor/` and bundle the image worker, so everything is served from our own origin. First time only: `npx playwright install chromium` (add `firefox webkit` for `test:e2e:all`; see [docs/verification/browsers.md](docs/verification/browsers.md)).
 
 ## Deploy (static, free tier)
 
