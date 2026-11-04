@@ -83,7 +83,7 @@ export function ResultsPanel({
       <div className="flex flex-wrap items-center gap-3">
         <span
           className={cn(
-            "flex size-10 items-center justify-center rounded-full",
+            "pop-in flex size-10 items-center justify-center rounded-full",
             outputs.length ? "bg-teal-soft text-teal" : "bg-destructive/10 text-destructive",
           )}
         >

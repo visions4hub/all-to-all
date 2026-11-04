@@ -23,6 +23,7 @@ export function PageHero({
   return (
     <section className="border-b bg-card/60">
       <Container className="py-10 sm:py-14">
+        <span className="mb-4 block h-px w-12 bg-gold" aria-hidden />
         {eyebrow && <p className="mb-3 text-sm font-semibold text-primary">{t(eyebrow)}</p>}
         <h1 className="text-3xl font-bold text-balance sm:text-4xl">{t(title)}</h1>
         {description && <p className="mt-3 max-w-2xl text-base text-pretty text-muted-foreground sm:text-lg">{t(description)}</p>}

@@ -15,7 +15,9 @@ import {
   SlidersHorizontal,
   Sparkles,
 } from "lucide-react";
+import { BrandMark } from "@/components/brand";
 import { SmartUpload } from "@/components/files/smart-upload";
+import { Reveal } from "@/components/reveal";
 import { Container } from "@/components/page-shell";
 import { ToolCard, ToolGrid } from "@/components/tool-card";
 import { WorkflowPresetList } from "@/components/workflow-presets";
@@ -29,18 +31,19 @@ function SectionHeader({ title, description, href, linkLabel }: { title: Localiz
   const t = useT();
   const Arrow = useLocale() === "ar" ? ArrowLeft : ArrowRight;
   return (
-    <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+    <Reveal className="mb-7 flex flex-wrap items-end justify-between gap-3">
       <div>
+        <span className="mb-3 block h-px w-12 bg-gold" aria-hidden />
         <h2 className="text-2xl font-bold sm:text-3xl">{t(title)}</h2>
         {description && <p className="mt-2 max-w-2xl text-muted-foreground">{t(description)}</p>}
       </div>
       {href && linkLabel && (
-        <Link href={href} className="inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline">
+        <Link href={href} className="group inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline">
           {t(linkLabel)}
-          <Arrow className="size-4" />
+          <Arrow className="size-4 transition-transform group-hover:-translate-x-0.5 ltr:group-hover:translate-x-0.5" />
         </Link>
       )}
-    </div>
+    </Reveal>
   );
 }
 
@@ -89,6 +92,22 @@ const FAQ: { q: Localized; a: Localized }[] = [
   },
 ];
 
+/** Fine gold contour lines behind the hero: static, flat, very low contrast. */
+function HeroLines() {
+  return (
+    <svg className="pointer-events-none absolute inset-0 size-full text-gold opacity-[0.16]" preserveAspectRatio="none" viewBox="0 0 1200 600" aria-hidden>
+      <g fill="none" stroke="currentColor" strokeWidth="1">
+        {Array.from({ length: 9 }, (_, i) => (
+          <path key={`a${i}`} d={`M-50 ${120 + i * 14} C 250 ${20 + i * 10}, 420 ${260 + i * 6}, 700 ${140 + i * 12} S 1100 ${40 + i * 8}, 1260 ${110 + i * 12}`} />
+        ))}
+        {Array.from({ length: 7 }, (_, i) => (
+          <path key={`b${i}`} d={`M-50 ${560 - i * 12} C 300 ${470 - i * 8}, 560 ${600 - i * 6}, 860 ${500 - i * 10} S 1150 ${430 - i * 6}, 1260 ${470 - i * 10}`} />
+        ))}
+      </g>
+    </svg>
+  );
+}
+
 export function HomeContent() {
   const t = useT();
   const locale = useLocale();
@@ -100,27 +119,23 @@ export function HomeContent() {
     <>
       {/* 1. Hero + smart upload */}
       <section className="relative overflow-hidden border-b">
-        <div className="bg-grid pointer-events-none absolute inset-0 [mask-image:radial-gradient(ellipse_at_top,black_20%,transparent_70%)] opacity-70" aria-hidden />
-        <div
-          className="pointer-events-none absolute -top-40 start-1/2 h-[480px] w-[780px] -translate-x-1/2 rounded-full opacity-40 blur-3xl rtl:translate-x-1/2"
-          style={{ background: "radial-gradient(closest-side, color-mix(in oklab, var(--primary) 35%, transparent), transparent), radial-gradient(closest-side, color-mix(in oklab, var(--teal) 30%, transparent), transparent)" }}
-          aria-hidden
-        />
+        <HeroLines />
         <Container className="relative py-14 text-center sm:py-20">
-          <p className="mx-auto mb-5 inline-flex items-center gap-2 rounded-full border bg-card/80 px-3.5 py-1.5 text-xs font-medium text-muted-foreground backdrop-blur">
-            <ShieldCheck className="size-4 text-teal" />
+          <BrandMark animated className="mx-auto mb-7 size-20 sm:size-24" />
+          <p className="mx-auto mb-5 inline-flex items-center gap-2 rounded-full border border-gold/30 bg-card/70 px-3.5 py-1.5 text-xs font-medium text-muted-foreground backdrop-blur">
+            <ShieldCheck className="size-4 text-gold" />
             {t({ ar: "معالجة كاملة داخل متصفحك", en: "Processed entirely in your browser" })}
           </p>
           <h1 className="mx-auto max-w-3xl text-4xl leading-[1.25] font-bold text-balance sm:text-5xl sm:leading-[1.2] lg:text-6xl">
             {locale === "ar" ? (
               <>
                 <span className="inline-block">كل ملفاتك.</span> <span className="inline-block">كل أدواتك.</span>{" "}
-                <span className="inline-block text-primary">بمكان واحد.</span>
+                <span className="text-gold-shine inline-block">بمكان واحد.</span>
               </>
             ) : (
               <>
                 <span className="inline-block">Every File.</span> <span className="inline-block">Every Tool.</span>{" "}
-                <span className="inline-block text-primary">One Place.</span>
+                <span className="text-gold-shine inline-block">One Place.</span>
               </>
             )}
           </h1>
@@ -149,7 +164,7 @@ export function HomeContent() {
               { ar: "بدون حدود يومية", en: "No daily limits" },
             ].map((x) => (
               <li key={x.en} className="flex items-center gap-1.5">
-                <span className="size-1.5 rounded-full bg-teal" />
+                <span className="size-1.5 rotate-45 bg-gold" />
                 {t(x)}
               </li>
             ))}

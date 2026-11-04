@@ -1,3 +1,5 @@
+<p align="center"><img src="public/icon.svg" width="96" alt="All To All logo" /></p>
+
 # All To All — By Visions
 
 **كل ملفاتك. كل أدواتك. بمكان واحد. · Every File. Every Tool. One Place.**

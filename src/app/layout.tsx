@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { IBM_Plex_Sans_Arabic, Readex_Pro } from "next/font/google";
+import { Cinzel, IBM_Plex_Sans_Arabic, Readex_Pro } from "next/font/google";
 import { AppProviders } from "@/components/app-providers";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
@@ -21,6 +21,14 @@ const display = Readex_Pro({
   display: "swap",
 });
 
+// Classic serif capitals for the "ALL TO ALL" wordmark only.
+const brandSerif = Cinzel({
+  variable: "--font-serif-brand",
+  subsets: ["latin"],
+  weight: ["500", "600"],
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: {
     default: "All To All — كل ملفاتك. كل أدواتك. بمكان واحد.",
@@ -37,18 +45,18 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#fafaf8" },
-    { media: "(prefers-color-scheme: dark)", color: "#0d1220" },
+    { media: "(prefers-color-scheme: light)", color: "#0b0a08" },
+    { media: "(prefers-color-scheme: dark)", color: "#0b0a08" },
   ],
 };
 
 // Runs before first paint: applies the saved language/direction and theme so
 // returning visitors don't see a flash of the wrong layout or colors.
-const prefsScript = `(function(){try{var p=JSON.parse(localStorage.getItem('ata-prefs')||'{}').state||{};var l=p.locale==='en'?'en':'ar';var d=document.documentElement;d.lang=l;d.dir=l==='ar'?'rtl':'ltr';var t=p.theme||'system';var dark=t==='dark'||(t==='system'&&matchMedia('(prefers-color-scheme: dark)').matches);if(dark)d.classList.add('dark');}catch(e){}})();`;
+const prefsScript = `(function(){try{var p=JSON.parse(localStorage.getItem('ata-prefs')||'{}').state||{};var l=p.locale==='en'?'en':'ar';var d=document.documentElement;d.lang=l;d.dir=l==='ar'?'rtl':'ltr';var t=p.theme||'dark';d.classList.add('motion-ready');var dark=t==='dark'||(t==='system'&&matchMedia('(prefers-color-scheme: dark)').matches);if(dark)d.classList.add('dark');}catch(e){}})();`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ar" dir="rtl" className={`${body.variable} ${display.variable} h-full antialiased`} suppressHydrationWarning>
+    <html lang="ar" dir="rtl" className={`${body.variable} ${display.variable} ${brandSerif.variable} h-full antialiased`} suppressHydrationWarning>
       <head>
         {/* First in <head> so it covers everything after it; works on hosts that can't set headers. */}
         <meta httpEquiv="Content-Security-Policy" content={META_CSP} />
