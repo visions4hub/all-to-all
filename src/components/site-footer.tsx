@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { ShieldCheck } from "lucide-react";
-import { BrandLogo } from "@/components/brand";
+import { BrandMark, BrandWordmark } from "@/components/brand";
+import { GoldSilk } from "@/components/gold-silk";
 import { Container } from "@/components/page-shell";
 import { useT, type Localized } from "@/lib/i18n";
 import { toolsInCategory } from "@/lib/tools/registry";
@@ -21,10 +22,15 @@ export function SiteFooter() {
   const image = toolsInCategory("image").slice(0, 6);
 
   return (
-    <footer className="mt-20 border-t bg-card/50">
-      <Container className="grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
+    <footer className="relative mt-20 overflow-hidden border-t border-gold/15 bg-[#080706]">
+      <GoldSilk corners="bottom" className="opacity-60" />
+      <Container className="relative grid gap-10 py-14 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
         <div className="max-w-sm">
-          <BrandLogo />
+          {/* The full lockup, as in the brand artwork: knot above the wordmark. */}
+          <Link href="/" dir="ltr" className="inline-flex flex-col items-center gap-3" aria-label="All To All — By Visions">
+            <BrandMark className="h-20" />
+            <BrandWordmark className="h-8" />
+          </Link>
           <p className="mt-4 text-sm leading-7 text-muted-foreground">
             {t({ ar: "كل ملفاتك. كل أدواتك. بمكان واحد.", en: "Every File. Every Tool. One Place." })}
           </p>
@@ -45,7 +51,7 @@ export function SiteFooter() {
         />
         <FooterColumn title={{ ar: "المنصة", en: "Platform" }} links={SITE_LINKS} />
       </Container>
-      <div className="border-t">
+      <div className="relative border-t border-gold/10">
         <Container className="flex flex-col items-center justify-between gap-2 py-5 text-xs text-muted-foreground sm:flex-row">
           <p>
             © <span dir="ltr">2026</span> All To All · By Visions

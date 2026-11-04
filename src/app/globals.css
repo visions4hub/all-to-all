@@ -108,7 +108,32 @@
     cursor: pointer;
   }
   ::selection {
-    background: color-mix(in oklab, var(--primary) 22%, transparent);
+    background: color-mix(in oklab, var(--gold) 35%, transparent);
+    color: var(--foreground);
+  }
+  /* Native checkboxes, radios, range sliders and progress bars in gold. */
+  :root {
+    accent-color: var(--gold);
+  }
+  /* Scrollbars: thin, dark track, gold thumb. */
+  html {
+    scrollbar-color: color-mix(in oklab, var(--gold) 45%, transparent) var(--background);
+    scrollbar-width: thin;
+  }
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--background);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: color-mix(in oklab, var(--gold) 40%, transparent);
+    border: 3px solid var(--background);
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in oklab, var(--gold) 65%, transparent);
   }
 }
 

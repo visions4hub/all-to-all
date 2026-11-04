@@ -16,6 +16,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { BrandMark } from "@/components/brand";
+import { GoldSilk } from "@/components/gold-silk";
 import { SmartUpload } from "@/components/files/smart-upload";
 import { Container } from "@/components/page-shell";
 import { ToolCard, ToolGrid } from "@/components/tool-card";
@@ -91,22 +92,6 @@ const FAQ: { q: Localized; a: Localized }[] = [
   },
 ];
 
-/** Fine gold contour lines behind the hero: static, flat, very low contrast. */
-function HeroLines() {
-  return (
-    <svg className="pointer-events-none absolute inset-0 size-full text-gold opacity-[0.16]" preserveAspectRatio="none" viewBox="0 0 1200 600" aria-hidden>
-      <g fill="none" stroke="currentColor" strokeWidth="1">
-        {Array.from({ length: 9 }, (_, i) => (
-          <path key={`a${i}`} d={`M-50 ${120 + i * 14} C 250 ${20 + i * 10}, 420 ${260 + i * 6}, 700 ${140 + i * 12} S 1100 ${40 + i * 8}, 1260 ${110 + i * 12}`} />
-        ))}
-        {Array.from({ length: 7 }, (_, i) => (
-          <path key={`b${i}`} d={`M-50 ${560 - i * 12} C 300 ${470 - i * 8}, 560 ${600 - i * 6}, 860 ${500 - i * 10} S 1150 ${430 - i * 6}, 1260 ${470 - i * 10}`} />
-        ))}
-      </g>
-    </svg>
-  );
-}
-
 export function HomeContent() {
   const t = useT();
   const locale = useLocale();
@@ -118,7 +103,7 @@ export function HomeContent() {
     <>
       {/* 1. Hero + smart upload */}
       <section className="relative overflow-hidden border-b">
-        <HeroLines />
+        <GoldSilk />
         <Container className="relative py-14 text-center sm:py-20">
           <BrandMark className="mx-auto mb-7 h-32 sm:h-40" />
           <p className="mx-auto mb-5 inline-flex items-center gap-2 rounded-full border border-gold/30 bg-card/70 px-3.5 py-1.5 text-xs font-medium text-muted-foreground backdrop-blur">

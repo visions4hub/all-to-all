@@ -63,9 +63,9 @@ const ICONS: Record<ToolIconName, LucideIcon> = {
   gif: Film,
 };
 
+// `category` is accepted for callers' clarity; every tool icon is gold, so it doesn't change the look.
 export function ToolIcon({
   name,
-  category,
   size = "md",
   className,
 }: {
