@@ -412,8 +412,9 @@ function FrameStrip({ settings: s, onChange, files, current, onSelect }: { setti
     const over = indexAt(e.clientX, e.clientY);
     if (over !== null && over !== drag.over) setDrag({ ...drag, over });
   };
-  const onPointerUp = () => {
-    if (drag) reorder(drag.from, drag.over);
+  const onPointerUp = (e: ReactPointerEvent<HTMLElement>) => {
+    // Drop where the pointer is released: browsers may coalesce the last pointermove away.
+    if (drag) reorder(drag.from, indexAt(e.clientX, e.clientY) ?? drag.over);
     setDrag(null);
   };
 
