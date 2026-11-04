@@ -12,4 +12,6 @@ export const IMAGE_MODULES: Record<string, ToolModuleLoader> = {
   "blur-image": () => import("./blur"),
   "meme-generator": () => import("./meme"),
   "photo-editor": () => import("./photo-editor"),
+  "image-metadata": () => import("./metadata"),
+  "gif-maker": () => import("./gif"),
 };

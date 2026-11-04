@@ -86,3 +86,84 @@ Layout (`e2e/image/layout.spec.ts`): every tool page with a file loaded, Arabic 
 
 - `docs/VERIFICATION.md` not edited (left for the parent session to merge). The Milestone 1 row "Universal workspace … Implemented, not fully verified" can now be marked Operational: all nine image tools exercise files, preview, settings sidebar and mobile sheet, process, results, download, ZIP and before/after end to end (renaming an output before download was not tested).
 - README not edited; it may want a line for `npm run test:e2e` (needs `npm run build` first, and `npx playwright install chromium` once).
+
+---
+
+# Milestone 4 — Image Metadata and GIF Maker
+
+Branch `m4-image-metadata-gif` (on top of `main` 928546c). Last run: 4 November 2026.
+
+| Check | Result |
+|---|---|
+| `npm run typecheck` | pass |
+| `npm run lint` | pass (0 problems) |
+| `npm test` (Vitest) | 301 passing — 39 new (`lib/metadata/metadata.test.ts` 27, `lib/gif.test.ts` 12) |
+| `npm run build` | pass, 41 static pages |
+| `E2E_PORT=4192 npx playwright test e2e/image` | 145 passing, 1 skipped (phone-only pinch) — 24 new; run twice, no flakes |
+
+Both tools are **Operational** (`status: "operational"` in `src/lib/tools/image-tools.ts`).
+
+## Image Metadata (`src/tools/image/metadata.tsx`, `lib/metadata/`)
+
+**Reading** is our own code working on the file's bytes (no library): JPEG marker segments, PNG chunks, WebP RIFF chunks; EXIF/TIFF (IFD0, Exif IFD, GPS IFD, IFD1 thumbnail; little- and big-endian; damaged data never throws), XMP (attribute and element forms, rdf lists, entities), IPTC-IIM inside Photoshop 8BIM (APP13), and the ICC header + `desc`/`mluc` name (JPEG multi-segment, PNG iCCP inflated with `DecompressionStream`, WebP ICCP).
+
+Shown: real format, dimensions, file size, orientation, bit depth, colour type, chroma subsampling, progressive/interlaced, alpha, lossy/lossless, animation, ICC name/space/version, sRGB, gamma, DPI; camera make/model/lens/software/serial numbers; date taken, exposure, aperture, ISO, focal length, exposure bias, flash; GPS coordinates/altitude and IPTC/XMP places; artist, copyright, title, description, keywords, comments, PNG text. Private values are highlighted, and a red privacy warning appears when the photo has a GPS location. Every metadata block found is listed with its size.
+
+**Removing** is lossless and done on the bytes. Nothing is decoded or re-encoded:
+- JPEG: drops APP1 EXIF/XMP/extended XMP, APP13 IPTC/Photoshop, COM, APP2 MPF/FPXR, other APP3–APP15, JFXX thumbnails, and bytes after EOI (e.g. extra preview images or motion-photo video). Keeps APP0 JFIF, APP14 Adobe (needed for colour decoding), tables, frames, and the entropy-coded scans byte for byte (stuffed bytes and restart markers handled; progressive scans too).
+- PNG: drops tEXt/zTXt/iTXt (incl. XMP), eXIf, tIME, unknown ancillary chunks, and data after IEND. Keeps every critical chunk (unknown ones too) and the image/colour chunks (PLTE, tRNS, gAMA, cHRM, sRGB, sBIT, bKGD, pHYs, APNG chunks, cICP…), each copied with its CRC.
+- WebP: drops EXIF, XMP and unknown chunks, clears their VP8X flags, and rewrites the RIFF size. The bitstream chunks are copied unchanged.
+- Options: keep the ICC profile (on by default; the WebP flag stays set). Orientation: keep only the orientation tag (a 26-byte EXIF block with nothing else; the default, lossless), or rotate the pixels (re-saved through the canvas: JPG/WebP at 92%, PNG lossless; the browser's own sRGB profile is then kept or removed according to the ICC switch).
+- Self-check before output: the result is read back and must contain only what was chosen to keep, at the same image size; otherwise the file fails with an error instead of producing a wrong result. A damaged structure (truncated segment or chunk) is refused with a clear message and never rewritten.
+- The results say exactly what was removed (block types and sizes) and what was kept. Batch + ZIP come from the shared workspace.
+
+Unit tests build fixtures by hand (`lib/metadata/test-fixtures.ts`): a structurally complete JPEG (baseline and progressive, with FF00 stuffing and RST markers), a real PNG (zlib), and a lossless WebP header. Each gets EXIF with GPS and a thumbnail, XMP, IPTC, ICC, comments, text, tIME, private chunks and trailing data. After stripping, the output is **byte-identical to the original image without metadata**, no secret string is left, CRCs are valid, orientation-only output contains only that tag, unknown critical PNG chunks survive, and truncated files are refused.
+
+E2E (`e2e/image/metadata.spec.ts`, desktop + 375px):
+- A browser-made JPEG with all metadata and an Arabic filename: camera, lens, date, exposure, aperture, GPS, ICC, artist and city are shown, and the GPS warning is visible. After removal the download (`صورة الرحلة-clean.jpg`) is **byte-for-byte the browser's original JPEG** (its own ICC kept), with pixel diff 0.
+- A PNG + WebP batch with "keep ICC" off (English) gives a ZIP. The PNG equals the original exactly; the WebP has no metadata, the same VP8 bitstream, and pixel diff 0.
+- Orientation 6: "keep tag" leaves only Orientation=6; "rotate pixels" gives an upright 100×200 image with no EXIF.
+- A clean PNG says "no metadata" and comes back unchanged.
+
+## GIF Maker (`src/tools/image/gif.tsx`, `lib/gif.ts`)
+
+- Frames are drawn on a canvas at the output size (fit / fill-and-crop / stretch, on a background colour or transparent), then encoded **in the bundled image Web Worker** (`jobs.ts` op `gif`). Colour reduction is our median-cut quantiser with optional Floyd–Steinberg dithering (`lib/png.ts`). When a frame (or all frames, with one shared palette) has no more colours than the limit, the exact colours are used. LZW and the file structure come from **gifenc** (MIT).
+- Options: one duration for all frames or one per frame (ms, stored in 1/100 s, minimum 20 ms); play forever or N times (N=1 writes no loop block, N>1 writes N−1 repeats); output size like the first image (max longer side, default 600) or custom (giving one side keeps the ratio); fit mode; background colour or transparency (GIF 1-bit alpha, frames cleared with disposal 2); max colours 256–8; one palette or one per frame; dithering.
+- Live animated preview using each frame's own duration and the same layout code as the export, with play/pause and previous/next. Frame list: reorder by dragging the handle (pointer events, so mouse and touch) or with the earlier/later buttons (keyboard), plus per-frame duration fields. The order is the shared workspace order, so the file list and the frame list stay in sync.
+
+Unit tests decode our output with an independent decoder (**omggif**, MIT, devDependency): GIF89a header and trailer, frame count, size, delays, NETSCAPE loop count (forever / none / N−1), exact colours for flat frames, one global vs. three local colour tables, at most N colours, dithering, transparency index + disposal, semi-transparent → opaque, the worker job, and rejection of mismatched sizes. Layout (contain/cover/stretch) and output-size maths are tested too.
+
+E2E (`e2e/image/gif.spec.ts`, desktop + 375px):
+- 3 images with Arabic names, per-frame 200/300/1250 ms, played twice → `إطار أحمر-animated.gif`: 120×80, 3 frames, delays 20/30/125, loop count 1, exact red/green/blue, and the worker answered.
+- Reorder with the buttons (incl. keyboard Enter) and by dragging (**mouse on desktop, real touch events on the phone project**): frames come out in the new order. Global 150 ms, loop forever, a 40×80 first frame with the others fitted on white (letterbox checked).
+- Custom 100×100 + fill + transparent + 32 colours + one palette: one colour table, transparent corners, at most 32 colours.
+- The live preview shows all 3 frames over time and stops when paused.
+
+## Known limitations
+
+- Metadata reading covers JPEG, PNG and WebP (the tool's `accepts`). HEIC/AVIF/TIFF are not accepted. Maker notes (vendor-specific EXIF blobs) are removed but not displayed. XMP is read with a pattern reader for display only, so unusual XMP layouts may show fewer fields (they are still removed).
+- PNG `zTXt "Raw profile type exif"` (ImageMagick style) is listed and removed as a text chunk but not decoded as EXIF.
+- "Rotate pixels" re-encodes (JPG/WebP at 92%). "Keep tag" is the lossless choice and the default.
+- GIF: at most 256 colours per frame, semi-transparent edges become hard, and the preview shows full colour (it says so). Browsers treat delays under 20 ms as 100 ms, so the minimum is 20 ms. Long or large GIFs use a lot of memory (all frames are held as pixels while encoding); the default max side of 600 px keeps typical GIFs light, and it can be cleared.
+- Animated GIF input is not accepted (registry `accepts` stays JPG/PNG/WebP).
+
+## New dependencies
+
+| Package | License | Where | Why |
+|---|---|---|---|
+| `gifenc` 1.0.3 | MIT | dependency, bundled into `public/vendor/image-worker.js` | GIF LZW encoding and file structure |
+| `omggif` 1.0.10 | MIT | devDependency (tests only) | Independent GIF decoder to verify our output |
+| `@types/omggif` 1.0.5 | MIT | devDependency | Types for the above |
+
+No CDN and no runtime download; gifenc has no dependencies of its own.
+
+## Shared change needed (not made — outside this work stream)
+
+- **`src/components/workspace/results-panel.tsx`: add `min-w-0` to the result card `<li className="flex flex-col gap-3 …">`.** After processing, the card's min-content width (the filename input row) makes the results panel wider than a 375px screen in **every** tool (measured: compress-image and image-metadata 406px, GIF 399px; the page then scrolls sideways or zooms out). `layout.spec.ts` only checks before processing, so it didn't catch this. With `min-w-0` the page is exactly 375px wide. Until then, `e2e/image/gif.spec.ts` dispatches the Download click directly on phones, because Playwright's click lands on the sticky header/action bar of that zoomed-out page (explained in the spec).
+
+## Other files touched
+
+- `src/lib/tools/image-tools.ts`: `image-metadata` and `gif-maker` → `"operational"` (nothing else changed).
+- `src/tools/image/index.ts`: two loaders. `src/tools/image/lib/jobs.ts`: the `gif` job (frame buffers are transferred, not copied).
+- `e2e/image/layout.spec.ts`: the two new slugs added (direction + no horizontal scroll with a file loaded, both languages, both sizes).
+- `package.json` / `package-lock.json`: the dependencies above. `docs/VERIFICATION.md` not edited.

@@ -178,7 +178,7 @@ export const IMAGE_TOOLS: ToolDefinition[] = [
     outputs: ["JPG", "PNG", "WebP"],
     minFiles: 1,
     maxFiles: null,
-    status: "building",
+    status: "operational",
     milestone: 4,
   },
   {
@@ -193,7 +193,7 @@ export const IMAGE_TOOLS: ToolDefinition[] = [
     outputs: ["GIF"],
     minFiles: 2,
     maxFiles: null,
-    status: "building",
+    status: "operational",
     milestone: 4,
   },
 ];
