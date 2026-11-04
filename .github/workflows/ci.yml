@@ -70,11 +70,16 @@ jobs:
       - if: env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_ACCOUNT_ID != ''
         name: Publish to Cloudflare Pages
         # Only the commit hash is passed (never the commit message, which could inject shell code).
-        # A token pasted into the GitHub form can pick up a stray line break or a second line;
-        # Cloudflare tokens are one word, so keep the first non-empty word and report its shape.
+        # A Cloudflare token is a single word. Trailing spaces/line breaks from pasting are
+        # removed; anything else (e.g. the "curl … Bearer …" test command) fails with a clear
+        # message. Only the token's shape is printed, never its value.
         run: |
-          lines=$(printf '%s\n' "$CLOUDFLARE_API_TOKEN" | tr -d '\r' | grep -c '[^[:space:]]' || true)
-          token=$(printf '%s\n' "$CLOUDFLARE_API_TOKEN" | tr -d '\r' | awk 'NF { print $1; exit }')
-          echo "Token secret: ${lines} non-empty line(s); using a ${#token}-character token."
-          if [ "$lines" -gt 1 ]; then echo "::warning::CLOUDFLARE_API_TOKEN has ${lines} lines; only the first is used. Re-save the secret with just the token."; fi
+          token=$(printf '%s' "$CLOUDFLARE_API_TOKEN" | tr -d '\r' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+          case "$token" in
+            *[[:space:]]*)
+              words=$(printf '%s' "$token" | wc -w)
+              echo "::error::CLOUDFLARE_API_TOKEN contains ${words} words. Save only the token itself (one word, about 40 characters), not the test command shown under it."
+              exit 1 ;;
+          esac
+          echo "Token secret: one word, ${#token} characters."
           CLOUDFLARE_API_TOKEN="$token" npx --yes wrangler@4.157.0 pages deploy out --project-name all-to-all --branch main --commit-hash "$GITHUB_SHA" --commit-dirty=true
