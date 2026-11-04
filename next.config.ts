@@ -6,6 +6,8 @@ const nextConfig: NextConfig = {
   output: "export",
   trailingSlash: true,
   images: { unoptimized: true },
+  // Don't let `next dev` write an AGENTS.md file into the repository.
+  agentRules: false,
   turbopack: {
     // A stray package-lock.json in the user folder confuses root detection.
     root: process.cwd(),
