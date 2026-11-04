@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Loader2, Play, Settings2, ShieldCheck, Square } from "lucide-react";
+import { Loader2, MemoryStick, Play, Settings2, ShieldCheck, Square } from "lucide-react";
 import { FileDropzone } from "@/components/files/file-dropzone";
 import { FileFacts, FileList, FileListToolbar } from "@/components/files/file-list";
 import { FileThumb } from "@/components/files/file-thumb";
@@ -9,10 +9,11 @@ import { ResultsPanel } from "@/components/workspace/results-panel";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
+import { deviceMemoryGB, estimatePeakMemory, memoryBudget, memoryLevel } from "@/lib/engine/memory";
 import { runProcessor } from "@/lib/engine/run";
 import type { Progress as ProgressInfo, RunResult } from "@/lib/engine/types";
 import { buildOutputName } from "@/lib/files/filename";
-import { formatNumber } from "@/lib/files/format";
+import { formatBytes, formatNumber } from "@/lib/files/format";
 import { useT } from "@/lib/i18n";
 import { acceptAttribute } from "@/lib/tools/registry";
 import type { ToolDefinition } from "@/lib/tools/types";
@@ -56,6 +57,10 @@ export function ToolWorkspace<S>({ tool, module }: { tool: ToolDefinition; modul
     return msg ? t(msg) : null;
   })();
 
+  // Warn (never block) before a run that likely needs more memory than this device comfortably has.
+  const peakMemory = estimatePeakMemory(filesToUse, module.mode);
+  const heavy = memoryLevel(peakMemory, memoryBudget(deviceMemoryGB())) === "high";
+
   const start = async () => {
     if (problem || running) return;
     const controller = new AbortController();
@@ -95,6 +100,17 @@ export function ToolWorkspace<S>({ tool, module }: { tool: ToolDefinition; modul
         </Button>
       )}
       {!running && problem && accepted.length > 0 && <p className="text-center text-xs text-muted-foreground">{problem}</p>}
+      {!running && !problem && heavy && (
+        <p className="flex items-start gap-1.5 rounded-lg bg-warning/10 p-2 text-xs text-foreground" data-testid="memory-warning">
+          <MemoryStick className="mt-0.5 size-3.5 shrink-0 text-warning" />
+          <span>
+            {t({
+              ar: `هذه مهمة كبيرة على هذا الجهاز (قد تحتاج نحو ${formatBytes(peakMemory)} من الذاكرة). قد تكون بطيئة أو تتوقف؛ أغلق التبويبات الأخرى أو عالج ملفات أقل في المرة الواحدة.`,
+              en: `This is a large job for this device (it may need about ${formatBytes(peakMemory)} of memory). It may be slow or fail; close other tabs or process fewer files at once.`,
+            })}
+          </span>
+        </p>
+      )}
     </div>
   );
 
@@ -149,7 +165,7 @@ export function ToolWorkspace<S>({ tool, module }: { tool: ToolDefinition; modul
               <module.Preview settings={settings} onChange={setSettings} file={active} files={filesToUse} />
             ) : (
               <div>
-                <FileThumb file={active} fit="contain" className="aspect-[4/3] w-full rounded-xl" />
+                <FileThumb file={active} fit="contain" full className="aspect-[4/3] w-full rounded-xl" />
                 <div className="mt-3 px-1">
                   <p dir="auto" className="truncate font-medium">
                     {active.name}

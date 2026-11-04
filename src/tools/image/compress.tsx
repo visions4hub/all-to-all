@@ -4,7 +4,7 @@ import { throwIfCancelled } from "@/lib/engine/types";
 import { useT } from "@/lib/i18n";
 import type { SettingsProps, ToolModule } from "@/tools/types";
 import { localize } from "./lib/errors";
-import { getPixels, releaseCanvas } from "./lib/canvas";
+import { pixelSource, releaseCanvas } from "./lib/canvas";
 import { FORMAT_INFO, resolveFormat, type FormatChoice } from "./lib/format";
 import { computeResize } from "./lib/geometry";
 import { exportCanvas, loadToCanvas, META, outputName } from "./lib/pipeline";
@@ -170,7 +170,7 @@ const compress: ToolModule<CompressSettings> = {
       let blob: Blob;
       const meta = [META.size(size), META.format(format)];
       if (format === "png" && s.pngMode === "colors") {
-        const result = await runImageJob({ op: "png-quantized", px: getPixels(canvas), colors: s.colors, dither: s.dither }, signal);
+        const result = await runImageJob({ op: "png-quantized", px: await pixelSource(canvas), colors: s.colors, dither: s.dither }, signal);
         if (result.op !== "png") throw new Error("Unexpected worker result");
         blob = new Blob([result.bytes as BlobPart], { type: "image/png" });
         meta.push({ label: { ar: "الألوان", en: "Colours" }, value: String(result.info.colors) });

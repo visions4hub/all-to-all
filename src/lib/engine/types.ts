@@ -11,6 +11,8 @@ export type WorkspaceFile = {
   kind: FileKind;
   /** Object URL for image previews / PDF thumbnail; revoked when the file is removed. */
   previewUrl?: string;
+  /** Small preview of a large photo for lists and grids (object URL); revoked with the file. */
+  thumbUrl?: string;
   /** Pages, for PDFs, once known. */
   pageCount?: number;
   /** Pixel size, for images, once known. */

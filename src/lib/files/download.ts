@@ -1,4 +1,3 @@
-import JSZip from "jszip";
 import { dedupeNames } from "./filename";
 
 /** Triggers a browser download for a Blob, then frees the object URL. */
@@ -20,6 +19,8 @@ export async function zipFiles(
   files: { name: string; blob: Blob }[],
   onProgress?: (percent: number) => void,
 ): Promise<Blob> {
+  // JSZip (and its zlib) loads only when someone asks for a ZIP, not with every tool page.
+  const { default: JSZip } = await import("jszip");
   const zip = new JSZip();
   const names = dedupeNames(files.map((f) => f.name));
   files.forEach((f, i) => zip.file(names[i], f.blob, { binary: true }));

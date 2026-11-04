@@ -40,10 +40,10 @@ export function CompareSlider({
       onPointerMove={(e) => e.buttons === 1 && fromPointer(e.clientX)}
     >
       {/* eslint-disable-next-line @next/next/no-img-element -- local object URL */}
-      <img src={afterUrl} alt={t({ ar: "بعد", en: "After" })} className="block h-full w-full object-contain" draggable={false} />
+      <img src={afterUrl} alt={t({ ar: "بعد", en: "After" })} loading="lazy" decoding="async" className="block h-full w-full object-contain" draggable={false} />
       <div className="absolute inset-0" style={{ clipPath: `inset(0 ${100 - pos}% 0 0)` }}>
         {/* eslint-disable-next-line @next/next/no-img-element -- local object URL */}
-        <img src={beforeUrl} alt={t({ ar: "قبل", en: "Before" })} className="block h-full w-full object-contain" draggable={false} />
+        <img src={beforeUrl} alt={t({ ar: "قبل", en: "Before" })} loading="lazy" decoding="async" className="block h-full w-full object-contain" draggable={false} />
       </div>
       <span className="absolute top-2 left-2 rounded-md bg-black/60 px-2 py-0.5 text-xs font-medium text-white">
         {t({ ar: "قبل", en: "Before" })}

@@ -35,11 +35,22 @@ export class PdfOpenError extends Error {
   }
 }
 
-/** Opens a PDF from bytes. Callers must call `doc.loadingTask.destroy()` when finished. */
-export async function openPdf(data: ArrayBuffer | Uint8Array) {
+/**
+ * Opens a PDF from bytes. Callers must call `doc.loadingTask.destroy()` when finished.
+ * PDF.js takes ownership of the buffer (it is moved to its worker), so by default a
+ * copy is passed to keep the caller's bytes intact. Pass `{ owned: true }` when the
+ * bytes were read just for this call (e.g. `await file.arrayBuffer()`), to skip the
+ * extra copy of the whole file.
+ */
+export async function openPdf(data: ArrayBuffer | Uint8Array, { owned = false }: { owned?: boolean } = {}) {
   const pdfjs = await loadPdfJs();
-  // PDF.js takes ownership of the buffer, so pass a copy to keep the caller's intact.
-  const bytes = data instanceof Uint8Array ? data.slice() : new Uint8Array(data.slice(0));
+  const bytes = owned
+    ? data instanceof Uint8Array
+      ? data
+      : new Uint8Array(data)
+    : data instanceof Uint8Array
+      ? data.slice()
+      : new Uint8Array(data.slice(0));
   try {
     return await pdfjs.getDocument({ data: bytes, ...PDFJS_RESOURCES }).promise;
   } catch (error) {
@@ -74,7 +85,7 @@ export async function renderPageToCanvas(
 
 /** First-page thumbnail + page count, used for previews. */
 export async function pdfThumbnail(file: Blob, width = 320): Promise<{ url: string; pageCount: number }> {
-  const doc = await openPdf(await file.arrayBuffer());
+  const doc = await openPdf(await file.arrayBuffer(), { owned: true });
   try {
     const canvas = await renderPageToCanvas(doc, 1, width);
     const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.82));

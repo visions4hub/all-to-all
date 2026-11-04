@@ -13,6 +13,22 @@ let ready: Promise<boolean> | null = null;
 let seq = 0;
 const pending = new Map<number, Pending>();
 
+// The worker is closed after a while without jobs, so it doesn't keep its
+// memory for the rest of the visit; the next job starts it again (cached script).
+const IDLE_MS = 30_000;
+let idleTimer: ReturnType<typeof setTimeout> | undefined;
+
+function scheduleIdleStop() {
+  clearTimeout(idleTimer);
+  idleTimer = setTimeout(() => {
+    if (pending.size === 0 && worker) {
+      worker.terminate();
+      worker = null;
+      ready = null;
+    }
+  }, IDLE_MS);
+}
+
 function toError(message: string): Error {
   if (message.startsWith("RangeError")) return new RangeError(message);
   return new Error(message);
@@ -41,6 +57,7 @@ function spawn(): Promise<boolean> {
         const p = pending.get(id);
         if (!p) return;
         pending.delete(id);
+        if (pending.size === 0) scheduleIdleStop();
         if (error) p.reject(toError(error));
         else p.resolve(result!);
       };
@@ -70,6 +87,7 @@ function reset() {
  */
 export async function runImageJob(job: Job, signal?: AbortSignal): Promise<JobResult> {
   if (signal?.aborted) throw new CancelledError();
+  clearTimeout(idleTimer);
   const ok = typeof Worker !== "undefined" && (await spawn());
   if (!ok || !worker) return runJob(job);
   const id = ++seq;

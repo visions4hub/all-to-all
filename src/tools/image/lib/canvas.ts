@@ -7,6 +7,7 @@
 import { MESSAGES, userError } from "./errors";
 import { FORMAT_INFO, sniffFormat, type OutputFormat } from "./format";
 import { stepDownPlan, type Size } from "./geometry";
+import type { PixelSource } from "./jobs";
 import type { Pixels } from "./pixels";
 
 export type Decoded = {
@@ -114,6 +115,24 @@ export function getPixels(canvas: HTMLCanvasElement): Pixels {
   const ctx = canvas.getContext("2d")!;
   const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
   return { data: img.data, width: img.width, height: img.height };
+}
+
+/**
+ * Pixels of a canvas for a worker job. Reading a large canvas back
+ * (getImageData) can block the page for half a second, so where the browser
+ * allows it the canvas is snapshotted as an ImageBitmap (fast, asynchronous)
+ * and the worker reads the pixels itself. Otherwise the pixels are read here.
+ */
+export async function pixelSource(canvas: HTMLCanvasElement): Promise<PixelSource> {
+  if (typeof createImageBitmap === "function" && typeof OffscreenCanvas !== "undefined") {
+    try {
+      const bitmap = await createImageBitmap(canvas);
+      return { bitmap, width: canvas.width, height: canvas.height };
+    } catch {
+      // fall through to a direct read
+    }
+  }
+  return getPixels(canvas);
 }
 
 export function putPixels(canvas: HTMLCanvasElement, px: Pixels, x = 0, y = 0) {

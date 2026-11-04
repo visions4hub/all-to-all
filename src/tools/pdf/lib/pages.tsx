@@ -19,6 +19,7 @@ export function PageImage({ file, page, ready, rotate = 0, className }: { file: 
         <img
           src={thumb.url}
           alt=""
+          decoding="async"
           draggable={false}
           className="max-h-full max-w-full bg-white shadow-sm transition-transform duration-200"
           style={{ transform: rotate ? `rotate(${rotate}deg)` : undefined, ...(Math.abs(rotate) % 180 === 90 ? fitRotated(thumb.width, thumb.height) : {}) }}
@@ -116,7 +117,8 @@ export function PageGrid({
           </>
         );
         const cls = cn(
-          "relative rounded-xl border-2 p-1 text-start outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/50",
+          // content-visibility: the browser skips layout and paint for tiles far off screen (long documents).
+          "relative rounded-xl border-2 p-1 text-start outline-none transition-colors [contain-intrinsic-size:auto_160px] [content-visibility:auto] focus-visible:ring-3 focus-visible:ring-ring/50",
           mark === "selected" ? "border-primary bg-brand-soft" : mark === "removed" ? "border-destructive/60 bg-destructive/5" : "border-transparent",
           onToggle && "cursor-pointer hover:border-border",
         );

@@ -25,6 +25,7 @@ type WorkspaceState = {
 
 function release(file: WorkspaceFile) {
   if (file.previewUrl) URL.revokeObjectURL(file.previewUrl);
+  if (file.thumbUrl) URL.revokeObjectURL(file.thumbUrl);
 }
 
 export const useWorkspace = create<WorkspaceState>()((set, get) => ({
@@ -55,6 +56,7 @@ export const useWorkspace = create<WorkspaceState>()((set, get) => ({
       files: s.files.map((f) => {
         if (f.id !== id) return f;
         if (patch.previewUrl && f.previewUrl && patch.previewUrl !== f.previewUrl) URL.revokeObjectURL(f.previewUrl);
+        if (patch.thumbUrl && f.thumbUrl && patch.thumbUrl !== f.thumbUrl) URL.revokeObjectURL(f.thumbUrl);
         return { ...f, ...patch };
       }),
     })),

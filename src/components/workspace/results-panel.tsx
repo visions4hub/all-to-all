@@ -170,12 +170,12 @@ export function ResultsPanel({
             const showCompare = !!urls[i] && !!source?.previewUrl && source.kind !== "pdf" && source.kind !== "svg";
             const { ext } = splitExtension(o.name);
             return (
-              <li key={i} className="flex min-w-0 flex-col gap-3 rounded-xl border bg-background/60 p-3">
+              <li key={i} className="flex min-w-0 flex-col gap-3 rounded-xl border bg-background/60 p-3 [contain-intrinsic-size:auto_360px] [content-visibility:auto]">
                 {showCompare ? (
                   <CompareSlider beforeUrl={source!.previewUrl!} afterUrl={urls[i]!} className="aspect-[4/3]" />
                 ) : urls[i] ? (
                   // eslint-disable-next-line @next/next/no-img-element -- local object URL
-                  <img src={urls[i]!} alt="" className="aspect-[4/3] w-full rounded-lg border bg-muted object-contain" />
+                  <img src={urls[i]!} alt="" loading="lazy" decoding="async" className="aspect-[4/3] w-full rounded-lg border bg-muted object-contain" />
                 ) : null}
                 <div className="flex items-center gap-2">
                   <label className="min-w-0 flex-1">
