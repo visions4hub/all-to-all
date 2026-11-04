@@ -14,7 +14,7 @@ Detailed evidence: [image tools](verification/image-tools.md) · [PDF tools](ver
 | `npm run lint` | Clean |
 | `npm test` (Vitest) | 409 passed, 31 files |
 | `npm run build` | 41 static pages, static export |
-| `npm run test:e2e:all` (Playwright: Chromium desktop + phone, Firefox, WebKit desktop, WebKit iPhone) | **697 passed, 0 failed**, 8 skipped (each for a stated device limit, listed in [browsers.md](verification/browsers.md)) |
+| `npm run test:e2e:all` (Playwright: Chromium desktop + phone, Firefox, WebKit desktop, WebKit iPhone) | **697 passed, 0 failed** (re-run after the editor drag fix below), 8 skipped (each for a stated device limit, listed in [browsers.md](verification/browsers.md)) |
 | `npm audit --omit=dev` | 0 vulnerabilities |
 | Security headers / CSP | Every test runs under the real policy; `e2e/security.spec.ts` proves the page can't send data to another server or load outside scripts |
 
@@ -24,6 +24,10 @@ Detailed evidence: [image tools](verification/image-tools.md) · [PDF tools](ver
 - **Performance:** first-load JS on every tool page 274.5 → 201.2 KB gzip (−27%), Studio −22%, workflows −21%; layout shift on tool pages and saved-English visits is now 0; previews of large photos use small thumbnails (much lower memory); fewer main-thread freezes on big files. Details and before/after numbers in [performance.md](verification/performance.md).
 - **Security:** CSP `<meta>` in every page plus generated `_headers` (frame-ancestors, X-Frame-Options, Referrer-Policy, Permissions-Policy, COOP/CORP, caching) from one source (`src/lib/security/headers.json`); `connect-src 'self'`; JSZip no longer ships a Node polyfill that probed `eval`; build-only `shadcn` moved to devDependencies.
 - **Release:** generated third-party license notices (linked in the footer), CI workflow, `.nvmrc`, deploy guide.
+
+### Fixed after release check
+
+- Photo editor and Edit / Sign PDF: a quick drag could be dropped in Safari (WebKit) because the gesture was read from React state on release. The gesture is now mirrored in a ref. The WebKit drag test went from about 1 failure in 5 runs to 30/30.
 
 ### Not verified (needs a person or real devices)
 
