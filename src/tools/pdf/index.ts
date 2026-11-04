@@ -18,4 +18,6 @@ export const PDF_MODULES: Record<string, ToolModuleLoader> = {
   "fill-pdf-forms": () => import("./fill-forms"),
   "edit-pdf": () => import("./edit-pdf"),
   "sign-pdf": () => import("./sign-pdf"),
+  "compress-pdf": () => import("./compress"),
+  "compare-pdf": () => import("./compare"),
 };
