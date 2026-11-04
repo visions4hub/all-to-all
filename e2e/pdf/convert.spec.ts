@@ -46,6 +46,32 @@ test("image to PDF: separate files, original size, no margin", async ({ page }) 
   expect(png.getPage(0).getSize()).toEqual({ width: 300, height: 225 }); // 400×300 px at 96 px/inch
 });
 
+test("image to PDF: more sheet sizes, and a custom size typed in centimetres", async ({ page }) => {
+  await openTool(page, "image-to-pdf");
+  const images = await makeImages(page);
+  await upload(page, images.slice(0, 2));
+  let settings = await openSettings(page, "ar");
+  await settings.getByRole("radio", { name: "ملف لكل صورة" }).click();
+  await settings.getByLabel("حجم الصفحة").selectOption("a5");
+  await settings.getByRole("radio", { name: "عمودي" }).click();
+  await closeSettings(page);
+  await runTool(page, "تحويل إلى PDF");
+  let files = await unzip((await downloadResult(page, "ar")).bytes);
+  expect((await loadPdf(files[0].bytes)).getPage(0).getSize()).toEqual({ width: 419.53, height: 595.28 }); // A5 portrait
+
+  await page.getByRole("button", { name: "معالجة جديدة" }).click();
+  settings = await openSettings(page, "ar");
+  await settings.getByLabel("حجم الصفحة").selectOption("custom");
+  await settings.getByRole("radio", { name: "سم" }).click();
+  await settings.getByLabel("العرض").fill("12");
+  await settings.getByLabel("الارتفاع").fill("18");
+  await expect(settings.getByText("المسموح: من 2 إلى 500 سم.")).toBeVisible();
+  await closeSettings(page);
+  await runTool(page, "تحويل إلى PDF");
+  files = await unzip((await downloadResult(page, "ar")).bytes);
+  expect((await loadPdf(files[0].bytes)).getPage(0).getSize()).toEqual({ width: 340.16, height: 510.24 }); // 12 × 18 cm
+});
+
 test("PDF to image: pages to JPG at 150 DPI in a ZIP", async ({ page }) => {
   await openTool(page, "pdf-to-image");
   await upload(page, [pdfUpload("تقرير.pdf", await makePdf(2))]);

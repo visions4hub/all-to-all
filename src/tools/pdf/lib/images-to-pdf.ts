@@ -8,7 +8,32 @@ import { userError } from "./errors";
 import { mmToPt, type Box, type Matrix } from "./geometry";
 import { createPdfDocument, loadPdfLib, savePdf } from "./pdf-lib";
 
-export type PageSizeName = "a4" | "letter" | "original" | "custom";
+/** Standard sheet sizes, portrait, in millimetres (ISO 216, ANSI, and photo prints). */
+export const PAGE_PRESETS = {
+  a3: { w: 297, h: 420, label: "A3" },
+  a4: { w: 210, h: 297, label: "A4" },
+  a5: { w: 148, h: 210, label: "A5" },
+  a6: { w: 105, h: 148, label: "A6" },
+  b5: { w: 176, h: 250, label: "B5" },
+  letter: { w: 215.9, h: 279.4, label: "Letter" },
+  legal: { w: 215.9, h: 355.6, label: "Legal" },
+  tabloid: { w: 279.4, h: 431.8, label: "Tabloid" },
+  "photo-10x15": { w: 101.6, h: 152.4, label: "4×6″" },
+  "photo-13x18": { w: 127, h: 177.8, label: "5×7″" },
+} as const;
+export type PresetName = keyof typeof PAGE_PRESETS;
+export type PageSizeName = PresetName | "original" | "custom";
+
+/** Units offered for a custom size. Values are always stored in millimetres. */
+export type LengthUnit = "mm" | "cm" | "in" | "px";
+/** Millimetres per unit; "px" is a CSS pixel (96 per inch). */
+export const MM_PER_UNIT: Record<LengthUnit, number> = { mm: 1, cm: 10, in: 25.4, px: 25.4 / 96 };
+export const toUnit = (mm: number, unit: LengthUnit) => mm / MM_PER_UNIT[unit];
+export const fromUnit = (value: number, unit: LengthUnit) => value * MM_PER_UNIT[unit];
+/** Decimal places that keep a value readable in each unit. */
+export const UNIT_DECIMALS: Record<LengthUnit, number> = { mm: 1, cm: 2, in: 2, px: 0 };
+export const CUSTOM_MIN_MM = 20;
+export const CUSTOM_MAX_MM = 5000;
 export type ImageFit = "fit" | "fill" | "actual";
 
 export type ImageToPdfSettings = {
@@ -17,6 +42,8 @@ export type ImageToPdfSettings = {
   /** Custom size in millimetres (portrait values; orientation may swap them). */
   customWidth: number;
   customHeight: number;
+  /** Unit the custom size is typed in; display only, the size stays in millimetres. */
+  customUnit: LengthUnit;
   orientation: "auto" | "portrait" | "landscape";
   /** Millimetres on every side. */
   margin: number;
@@ -28,12 +55,12 @@ export const DEFAULT_IMAGE_TO_PDF: ImageToPdfSettings = {
   pageSize: "a4",
   customWidth: 210,
   customHeight: 297,
+  customUnit: "mm",
   orientation: "auto",
   margin: 10,
   fit: "fit",
 };
 
-const SIZES_PT: Record<"a4" | "letter", [number, number]> = { a4: [595.28, 841.89], letter: [612, 792] };
 /** Pixels are treated as CSS pixels (96 per inch) for "original size". */
 export const PX_TO_PT = 72 / 96;
 
@@ -41,7 +68,12 @@ export const PX_TO_PT = 72 / 96;
 export function pageSizeFor(s: ImageToPdfSettings, imgW: number, imgH: number): [number, number] {
   const marginPt = mmToPt(Math.max(0, s.margin));
   if (s.pageSize === "original") return [imgW * PX_TO_PT + 2 * marginPt, imgH * PX_TO_PT + 2 * marginPt];
-  let [w, h] = s.pageSize === "custom" ? [mmToPt(s.customWidth), mmToPt(s.customHeight)] : SIZES_PT[s.pageSize];
+  const preset = s.pageSize === "custom" ? undefined : PAGE_PRESETS[s.pageSize];
+  // An unknown name (e.g. from an older saved workflow) falls back to A4.
+  const mm = s.pageSize === "custom" ? { w: s.customWidth, h: s.customHeight } : (preset ?? PAGE_PRESETS.a4);
+  // Rounded to 0.01 pt, as PDF tools write sheet sizes (A4 = 595.28 × 841.89).
+  const pt = (v: number) => Math.round(mmToPt(v) * 100) / 100;
+  let [w, h] = [pt(mm.w), pt(mm.h)];
   const landscape = s.orientation === "landscape" || (s.orientation === "auto" && imgW > imgH);
   if (landscape !== w > h) [w, h] = [h, w];
   return [w, h];
@@ -152,8 +184,12 @@ export async function imagesToPdf(
   load: ImageLoader = defaultImageLoader,
 ): Promise<ProcessOutput[]> {
   const marginPt = mmToPt(Math.max(0, settings.margin));
-  if (settings.pageSize === "custom" && (!(settings.customWidth >= 20) || !(settings.customHeight >= 20) || settings.customWidth > 5000 || settings.customHeight > 5000)) {
-    throw userError({ ar: "اكتب مقاس صفحة بين 20 و5000 ملم.", en: "Enter a page size between 20 and 5000 mm." });
+  const okMm = (v: number) => v >= CUSTOM_MIN_MM && v <= CUSTOM_MAX_MM;
+  if (settings.pageSize === "custom" && (!okMm(settings.customWidth) || !okMm(settings.customHeight))) {
+    throw userError({
+      ar: "اكتب مقاس صفحة بين 2 و500 سم (20 إلى 5000 ملم).",
+      en: "Enter a page size between 2 and 500 cm (20 to 5000 mm).",
+    });
   }
   const outputs: ProcessOutput[] = [];
   let doc = await createPdfDocument();

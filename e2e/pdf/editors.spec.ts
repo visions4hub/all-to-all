@@ -96,6 +96,9 @@ test("edit PDF: freehand, arrow, highlight, delete with keyboard", async ({ page
   await upload(page, [pdfUpload("doc.pdf", await makePdf(1))]);
   const area = page.getByRole("application", { name: "Editing area" });
   await expect(area).toBeVisible();
+  // Bring the whole page into view, as a person would scroll to it: the mouse can only
+  // draw on the part of the page that is on screen.
+  await area.evaluate((el) => el.scrollIntoView({ block: "center" }));
   const b = (await area.boundingBox())!;
   await page.getByRole("button", { name: "Freehand" }).click();
   const at = (fx: number, fy: number): [number, number] => [b.x + b.width * fx, b.y + b.height * fy];

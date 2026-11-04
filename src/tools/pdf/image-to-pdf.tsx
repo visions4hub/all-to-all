@@ -8,7 +8,104 @@ import type { PreviewProps, SettingsProps, ToolModule } from "@/tools/types";
 import { Field, Note, NumberField, Segmented, SelectField } from "./lib/controls";
 import { mmToPt } from "./lib/geometry";
 import { bitmapToPng } from "./lib/image-input";
-import { DEFAULT_IMAGE_TO_PDF, imagesToPdf, pageSizeFor, placeImage, type ImageLoader, type ImageToPdfSettings } from "./lib/images-to-pdf";
+import {
+  CUSTOM_MAX_MM,
+  CUSTOM_MIN_MM,
+  DEFAULT_IMAGE_TO_PDF,
+  fromUnit,
+  imagesToPdf,
+  MM_PER_UNIT,
+  PAGE_PRESETS,
+  pageSizeFor,
+  placeImage,
+  toUnit,
+  UNIT_DECIMALS,
+  type ImageLoader,
+  type ImageToPdfSettings,
+  type LengthUnit,
+  type PageSizeName,
+  type PresetName,
+} from "./lib/images-to-pdf";
+
+const round = (v: number, decimals: number) => Math.round(v * 10 ** decimals) / 10 ** decimals;
+/** "21 × 29.7 cm" — sizes in the list are shown in centimetres (Latin digits). */
+const cmLabel = (w: number, h: number) => `${round(w / 10, 1)} × ${round(h / 10, 1)}`;
+
+const UNIT_LABELS: Record<LengthUnit, { ar: string; en: string }> = {
+  mm: { ar: "ملم", en: "mm" },
+  cm: { ar: "سم", en: "cm" },
+  in: { ar: "إنج", en: "in" },
+  px: { ar: "بكسل", en: "px" },
+};
+
+/** Custom page size typed in the unit the user picks; stored in millimetres. */
+function CustomSize({
+  settings: s,
+  set,
+  disabled,
+  ids,
+}: {
+  settings: ImageToPdfSettings;
+  set: (patch: Partial<ImageToPdfSettings>) => void;
+  disabled: boolean;
+  ids: { w: string; h: string };
+}) {
+  const t = useT();
+  // A setting from an imported workflow may hold anything; fall back to millimetres.
+  const unit: LengthUnit = s.customUnit in MM_PER_UNIT ? s.customUnit : "mm";
+  const d = UNIT_DECIMALS[unit];
+  const min = Math.ceil(toUnit(CUSTOM_MIN_MM, unit) * 10 ** d) / 10 ** d;
+  const max = Math.floor(toUnit(CUSTOM_MAX_MM, unit) * 10 ** d) / 10 ** d;
+  const step = d === 0 ? 1 : 1 / 10 ** Math.min(d, 1);
+  const suffix = t(UNIT_LABELS[unit]);
+  return (
+    <div className="space-y-3">
+      <Field label={t({ ar: "الوحدة", en: "Unit" })}>
+        <Segmented
+          label={t({ ar: "الوحدة", en: "Unit" })}
+          value={unit}
+          disabled={disabled}
+          onChange={(customUnit) => set({ customUnit })}
+          options={(Object.keys(MM_PER_UNIT) as LengthUnit[]).map((u) => ({ value: u, label: t(UNIT_LABELS[u]) }))}
+        />
+      </Field>
+      <div className="grid grid-cols-2 gap-3">
+        <Field label={t({ ar: "العرض", en: "Width" })} htmlFor={ids.w}>
+          <NumberField
+            id={ids.w}
+            value={round(toUnit(s.customWidth, unit), d)}
+            min={min}
+            max={max}
+            step={step}
+            integer={unit === "px"}
+            suffix={suffix}
+            disabled={disabled}
+            onChange={(v) => set({ customWidth: fromUnit(v, unit) })}
+          />
+        </Field>
+        <Field label={t({ ar: "الارتفاع", en: "Height" })} htmlFor={ids.h}>
+          <NumberField
+            id={ids.h}
+            value={round(toUnit(s.customHeight, unit), d)}
+            min={min}
+            max={max}
+            step={step}
+            integer={unit === "px"}
+            suffix={suffix}
+            disabled={disabled}
+            onChange={(v) => set({ customHeight: fromUnit(v, unit) })}
+          />
+        </Field>
+      </div>
+      <p className="text-xs text-muted-foreground">
+        {t({
+          ar: `المسموح: من ${min} إلى ${max} ${suffix}.${unit === "px" ? " البكسل هنا 96 لكل إنج." : ""}`,
+          en: `Allowed: ${min} to ${max} ${suffix}.${unit === "px" ? " Pixels here are 96 per inch." : ""}`,
+        })}
+      </p>
+    </div>
+  );
+}
 
 function Settings({ settings: s, onChange, files, disabled }: SettingsProps<ImageToPdfSettings>) {
   const t = useT();
@@ -35,23 +132,16 @@ function Settings({ settings: s, onChange, files, disabled }: SettingsProps<Imag
           disabled={disabled}
           onChange={(pageSize) => set({ pageSize })}
           options={[
-            { value: "a4", label: "A4" },
-            { value: "letter", label: "Letter" },
-            { value: "original", label: t({ ar: "بحجم الصورة", en: "Same as image" }) },
-            { value: "custom", label: t({ ar: "مقاس مخصص", en: "Custom size" }) },
+            ...(Object.entries(PAGE_PRESETS) as [PresetName, (typeof PAGE_PRESETS)[PresetName]][]).map(([value, p]) => ({
+              value: value as PageSizeName,
+              label: `${p.label} · ${cmLabel(p.w, p.h)} ${t({ ar: "سم", en: "cm" })}`,
+            })),
+            { value: "original" as PageSizeName, label: t({ ar: "بحجم الصورة", en: "Same as image" }) },
+            { value: "custom" as PageSizeName, label: t({ ar: "مقاس مخصص…", en: "Custom size…" }) },
           ]}
         />
       </Field>
-      {s.pageSize === "custom" && (
-        <div className="grid grid-cols-2 gap-3">
-          <Field label={t({ ar: "العرض", en: "Width" })} htmlFor={ids.w}>
-            <NumberField id={ids.w} value={s.customWidth} min={20} max={5000} suffix="mm" disabled={disabled} onChange={(customWidth) => set({ customWidth })} />
-          </Field>
-          <Field label={t({ ar: "الارتفاع", en: "Height" })} htmlFor={ids.h}>
-            <NumberField id={ids.h} value={s.customHeight} min={20} max={5000} suffix="mm" disabled={disabled} onChange={(customHeight) => set({ customHeight })} />
-          </Field>
-        </div>
-      )}
+      {s.pageSize === "custom" && <CustomSize settings={s} set={set} disabled={disabled} ids={ids} />}
       {s.pageSize !== "original" && (
         <Field label={t({ ar: "الاتجاه", en: "Orientation" })}>
           <Segmented

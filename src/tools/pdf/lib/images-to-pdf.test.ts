@@ -1,7 +1,22 @@
 import { describe, expect, it } from "vitest";
 import { UserFacingError } from "@/lib/engine/types";
 import { applyMatrix, mmToPt } from "./geometry";
-import { DEFAULT_IMAGE_TO_PDF, imagesToPdf, jpegOrientation, orientationMatrix, pageSizeFor, placeImage, PX_TO_PT, swapsAxes } from "./images-to-pdf";
+import {
+  DEFAULT_IMAGE_TO_PDF,
+  fromUnit,
+  imagesToPdf,
+  jpegOrientation,
+  MM_PER_UNIT,
+  orientationMatrix,
+  PAGE_PRESETS,
+  pageSizeFor,
+  placeImage,
+  PX_TO_PT,
+  swapsAxes,
+  toUnit,
+  type ImageToPdfSettings,
+  type LengthUnit,
+} from "./images-to-pdf";
 import { asInput, ctx, openOutput, pageContent, pageImageCount, RED_PNG } from "./test-fixtures";
 
 /** A structurally valid JPEG header (enough for pdf-lib) with an EXIF orientation. */
@@ -108,5 +123,49 @@ describe("images → PDF", () => {
 
   it("rejects margins bigger than the page", async () => {
     await expect(imagesToPdf([asInput(RED_PNG, "a.png", "png")], { ...DEFAULT_IMAGE_TO_PDF, margin: 200 }, ctx())).rejects.toBeInstanceOf(UserFacingError);
+  });
+});
+
+describe("page size choices", () => {
+  const portrait = (s: Partial<ImageToPdfSettings>) => pageSizeFor({ ...DEFAULT_IMAGE_TO_PDF, orientation: "portrait", ...s }, 100, 200);
+
+  it("every preset has its standard size in points", () => {
+    expect(portrait({ pageSize: "a3" })).toEqual([841.89, 1190.55]);
+    expect(portrait({ pageSize: "a4" })).toEqual([595.28, 841.89]);
+    expect(portrait({ pageSize: "a5" })).toEqual([419.53, 595.28]);
+    expect(portrait({ pageSize: "a6" })).toEqual([297.64, 419.53]);
+    expect(portrait({ pageSize: "b5" })).toEqual([498.9, 708.66]);
+    expect(portrait({ pageSize: "letter" })).toEqual([612, 792]);
+    expect(portrait({ pageSize: "legal" })).toEqual([612, 1008]);
+    expect(portrait({ pageSize: "tabloid" })).toEqual([792, 1224]);
+    expect(portrait({ pageSize: "photo-10x15" })).toEqual([288, 432]);
+    expect(portrait({ pageSize: "photo-13x18" })).toEqual([360, 504]);
+  });
+
+  it("landscape swaps every preset", () => {
+    for (const name of Object.keys(PAGE_PRESETS) as (keyof typeof PAGE_PRESETS)[]) {
+      const [w, h] = pageSizeFor({ ...DEFAULT_IMAGE_TO_PDF, pageSize: name, orientation: "landscape" }, 100, 200);
+      expect(w).toBeGreaterThan(h);
+    }
+  });
+
+  it("custom sizes are stored in millimetres whatever unit is shown", () => {
+    expect(portrait({ pageSize: "custom", customWidth: 100, customHeight: 150, customUnit: "cm" })).toEqual([283.46, 425.2]);
+  });
+
+  it("unit conversion round-trips and uses 96 px per inch", () => {
+    for (const unit of Object.keys(MM_PER_UNIT) as LengthUnit[]) expect(fromUnit(toUnit(210, unit), unit)).toBeCloseTo(210, 9);
+    expect(toUnit(25.4, "in")).toBe(1);
+    expect(toUnit(25.4, "px")).toBeCloseTo(96, 9);
+    expect(fromUnit(21, "cm")).toBe(210);
+  });
+
+  it("an unknown page size name (from an old or edited workflow) falls back to A4", () => {
+    expect(portrait({ pageSize: "folio" as never })).toEqual([595.28, 841.89]);
+  });
+
+  it("a custom size outside 20–5000 mm is refused with a clear message", async () => {
+    const run = imagesToPdf([asInput(RED_PNG, "a.png", "png")], { ...DEFAULT_IMAGE_TO_PDF, pageSize: "custom", customWidth: 10 }, ctx());
+    await expect(run).rejects.toBeInstanceOf(UserFacingError);
   });
 });
