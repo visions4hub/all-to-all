@@ -110,7 +110,14 @@ export function OverlayEditor({
   const [page, setPage] = useState(0);
   const [size, setSize] = useState<PageSize | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [draft, setDraft] = useState<Overlay[] | null>(null);
+  // The in-progress gesture is mirrored in a ref: pointer events can arrive before React
+  // re-renders, and reading state there would ignore moves or drop the gesture on release.
+  const [draft, setDraftState] = useState<Overlay[] | null>(null);
+  const draftRef = useRef<Overlay[] | null>(null);
+  const setDraft = (next: Overlay[] | null) => {
+    draftRef.current = next;
+    setDraftState(next);
+  };
   const [style, setStyle] = useState({ color: defaults?.color ?? "#d32f2f", strokeWidth: defaults?.strokeWidth ?? 2, fontSize: defaults?.fontSize ?? 16, opacity: 1 });
   const svgRef = useRef<SVGSVGElement>(null);
   const gesture = useRef<Gesture | null>(null);
@@ -246,10 +253,11 @@ export function OverlayEditor({
 
   const onMove = (e: React.PointerEvent) => {
     const g = gesture.current;
-    if (!g || !size || !draft) return;
+    const current = draftRef.current;
+    if (!g || !size || !current) return;
     const [x, y] = at(e);
-    setDraft((list) =>
-      (list ?? []).map((o) => {
+    setDraft(
+      current.map((o) => {
         if (g.type === "draw" && o.id === g.id) {
           if (o.kind === "path") return { ...o, points: [...(o.points ?? []), [x, y]] };
           const y1 = tool === "underline" ? g.y0 : y;
@@ -271,10 +279,11 @@ export function OverlayEditor({
   const onUp = () => {
     const g = gesture.current;
     gesture.current = null;
-    if (!g || !draft) return;
-    let list = draft;
+    const current = draftRef.current;
+    if (!g || !current) return;
+    let list = current;
     if (g.type === "draw") {
-      list = draft
+      list = current
         .map((o) => (o.id === g.id ? finishShape(o, size!) : o))
         .filter((o): o is Overlay => o !== null);
       setSelectedId(list.some((o) => o.id === g.id) ? g.id : null);

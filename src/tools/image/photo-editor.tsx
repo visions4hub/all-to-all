@@ -532,9 +532,22 @@ function Preview({ settings: s, onChange, file }: PreviewProps<PhotoSettings>) {
   const picture = view && adjusted && adjusted.src === view.canvas && adjusted.adjust === adjust ? adjusted.out : view?.canvas;
 
   // Live, uncommitted edits.
-  const [liveStroke, setLiveStroke] = useState<Stroke | null>(null);
+  // The stroke being drawn and the object being moved are also kept in refs: a quick
+  // gesture can end (pointerup) before React re-renders after the last pointermove,
+  // and reading state there would see an old value and drop the gesture.
+  const [liveStroke, setLiveStrokeState] = useState<Stroke | null>(null);
+  const liveStrokeRef = useRef<Stroke | null>(null);
+  const setLiveStroke = (next: Stroke | null) => {
+    liveStrokeRef.current = next;
+    setLiveStrokeState(next);
+  };
   const [draft, setDraft] = useState<EditorObject | null>(null);
-  const [override, setOverride] = useState<Doc | null>(null);
+  const [override, setOverrideState] = useState<Doc | null>(null);
+  const overrideRef = useRef<Doc | null>(null);
+  const setOverride = (next: Doc | null) => {
+    overrideRef.current = next;
+    setOverrideState(next);
+  };
   const shown = override ?? doc;
   const measured = useRef<Record<string, { w: number; h: number }>>({});
 
@@ -760,7 +773,8 @@ function Preview({ settings: s, onChange, file }: PreviewProps<PhotoSettings>) {
       const k = Math.hypot(p.x - g.center.x, p.y - g.center.y) / g.startDist;
       setOverride({ ...g.doc, objects: g.doc.objects.map((o) => (o.id === g.obj ? scaleObject(o, k) : o)) });
     } else if (g.kind === "stroke") {
-      setLiveStroke((st) => (st ? { ...st, points: [...st.points, p.x, p.y] } : st));
+      const st = liveStrokeRef.current;
+      if (st) setLiveStroke({ ...st, points: [...st.points, p.x, p.y] });
     } else if (g.kind === "draft") {
       setDraft(draftFor(g.start, p));
     }
@@ -775,10 +789,12 @@ function Preview({ settings: s, onChange, file }: PreviewProps<PhotoSettings>) {
     const g = gesture.current;
     if (!g || g.id !== e.pointerId) return;
     gesture.current = null;
-    if ((g.kind === "move" || g.kind === "scale") && override) {
-      onChange(commit({ ...s, doc: g.doc }, override));
-    } else if (g.kind === "stroke" && liveStroke) {
-      onChange(commit(s, { ...doc, strokes: [...doc.strokes, liveStroke] }));
+    const moved = overrideRef.current;
+    const stroke = liveStrokeRef.current;
+    if ((g.kind === "move" || g.kind === "scale") && moved) {
+      onChange(commit({ ...s, doc: g.doc }, moved));
+    } else if (g.kind === "stroke" && stroke) {
+      onChange(commit(s, { ...doc, strokes: [...doc.strokes, stroke] }));
     } else if (g.kind === "draft") {
       const end = toPicture(e.clientX, e.clientY);
       if (Math.hypot(end.x - g.start.x, end.y - g.start.y) > 3) onChange(addObject(s, { ...draftFor(g.start, end), id: newId() }));
