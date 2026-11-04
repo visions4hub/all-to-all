@@ -1,10 +1,14 @@
-<p align="center"><img src="public/brand/mark.png" width="140" alt="All To All logo" /><br/><img src="public/brand/wordmark.png" width="360" alt="All To All — By Visions" /></p>
+<p align="center">
+  <a href="https://all-to-all.pages.dev"><img src="assets/social-preview.png" alt="All To All — By Visions" width="100%" /></a>
+</p>
+
+<h3 align="center">كل ملفاتك. كل أدواتك. بمكان واحد. · Every File. Every Tool. One Place.</h3>
+
+<p align="center">
+  <a href="https://all-to-all.pages.dev"><b>🌐 افتح الموقع · Open the site → all-to-all.pages.dev</b></a>
+</p>
 
 # All To All — By Visions
-
-**كل ملفاتك. كل أدواتك. بمكان واحد. · Every File. Every Tool. One Place.**
-
-**Live:** https://all-to-all.pages.dev
 
 A free PDF and image toolbox that runs entirely in the browser. No accounts, no uploads, no subscriptions, no ads, no usage quotas. Arabic first (RTL), with English (LTR).
 
