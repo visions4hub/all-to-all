@@ -27,7 +27,7 @@ export async function compressPdfBytes(
   let staged: Uint8Array | null = null;
   if (settings.images) {
     if (encryption !== "none") report.imagesSkipped = "encrypted";
-    else if (!deps.codec) report.imagesSkipped = "unsupported";
+    else if (!deps.codec) report.imagesSkipped = "browser";
     else {
       try {
         const quality = Math.min(0.95, Math.max(0.3, settings.quality / 100));

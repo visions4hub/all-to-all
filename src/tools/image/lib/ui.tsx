@@ -9,8 +9,9 @@ import { readImageSize } from "@/lib/files/image-info";
 import { formatNumber } from "@/lib/files/format";
 import { dirFor, useLocale, useT, type Localized } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
+import { canEncode } from "./canvas";
 import { FONTS, type FontKey } from "./fonts";
-import { FORMAT_INFO, OUTPUT_FORMATS, type FormatChoice } from "./format";
+import { FORMAT_INFO, OUTPUT_FORMATS, type FormatChoice, type OutputFormat } from "./format";
 import type { Size } from "./geometry";
 
 export function Field({ label, hint, children, htmlFor }: { label: ReactNode; hint?: ReactNode; children: ReactNode; htmlFor?: string }) {
@@ -295,6 +296,29 @@ export const METADATA_NOTE: Localized = {
   en: "Saving through the browser removes image metadata (EXIF such as camera and location) and the colour profile.",
 };
 
+const encodeChecks = new Map<OutputFormat, Promise<boolean>>();
+
+/**
+ * Whether this browser can write the format (null while checking). Safari has no
+ * WebP encoder: canvas.toBlob("image/webp") silently returns a PNG there.
+ */
+export function useCanEncode(format: OutputFormat): boolean | null {
+  const [ok, setOk] = useState<boolean | null>(null);
+  useEffect(() => {
+    let live = true;
+    let check = encodeChecks.get(format);
+    if (!check) {
+      check = canEncode(format).catch(() => false);
+      encodeChecks.set(format, check);
+    }
+    check.then((v) => live && setOk(v));
+    return () => {
+      live = false;
+    };
+  }, [format]);
+  return ok;
+}
+
 /** Output format (+ quality for lossy formats). */
 export function OutputFormatFields({
   format,
@@ -317,10 +341,20 @@ export function OutputFormatFields({
     ...formats.map((f) => ({ value: f, label: FORMAT_INFO[f].label })),
   ];
   const lossy = format === "keep" || FORMAT_INFO[format].lossy;
+  const webpOk = useCanEncode("webp");
   return (
     <div className="space-y-3">
       <Field label={t({ ar: "صيغة الناتج", en: "Output format" })}>
         <Segmented label={t({ ar: "صيغة الناتج", en: "Output format" })} value={format} options={options} disabled={disabled} onChange={(f) => onChange({ format: f, quality })} />
+        {format === "webp" && webpOk === false && (
+          <p role="status" data-testid="webp-unsupported" className="flex items-start gap-2 rounded-xl border border-warning/30 bg-warning/8 p-2.5 text-xs leading-5">
+            <Info className="mt-0.5 size-3.5 shrink-0 text-warning" />
+            {t({
+              ar: "هذا المتصفح (مثل Safari) لا يستطيع حفظ الصور بصيغة WebP. اختر JPG أو PNG، أو استخدم Chrome أو Firefox أو Edge لحفظ WebP.",
+              en: "This browser (such as Safari) can't save images as WebP. Choose JPG or PNG, or use Chrome, Firefox or Edge to save WebP.",
+            })}
+          </p>
+        )}
       </Field>
       {lossy && (
         <SliderField

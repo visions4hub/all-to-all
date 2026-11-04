@@ -202,6 +202,16 @@ export function near(actual: number[], expected: number[], tolerance = 16) {
   return actual.every((v, i) => Math.abs(v - expected[i]) <= tolerance);
 }
 
+/**
+ * Whether the test can send real touch moves. Only Chromium has an input API
+ * for touch drags (DevTools `Input.dispatchTouchEvent`); Playwright's WebKit
+ * and Firefox can only tap. There, drags use the mouse, which goes through the
+ * same pointer-event handlers in the app.
+ */
+export function canTouchDrag(page: Page) {
+  return isMobile(page) && page.context().browser()?.browserType().name() === "chromium";
+}
+
 /** A real touch drag (Chrome DevTools touch events → pointer events with pointerType "touch"). */
 export async function touchDrag(page: Page, from: { x: number; y: number }, to: { x: number; y: number }, steps = 8) {
   const cdp = await page.context().newCDPSession(page);
@@ -215,13 +225,13 @@ export async function touchDrag(page: Page, from: { x: number; y: number }, to: 
   await cdp.detach();
 }
 
-/** Mouse drag on desktop, touch drag on phones. */
+/** Mouse drag on desktop, touch drag on phones (mouse where touch drags can't be sent, see canTouchDrag). */
 export async function dragBy(page: Page, target: Locator, dx: number, dy: number, offset = { x: 0, y: 0 }) {
   await target.scrollIntoViewIfNeeded();
   const box = (await target.boundingBox())!;
   const from = { x: box.x + box.width / 2 + offset.x, y: box.y + box.height / 2 + offset.y };
   const to = { x: from.x + dx, y: from.y + dy };
-  if (isMobile(page)) return touchDrag(page, from, to);
+  if (canTouchDrag(page)) return touchDrag(page, from, to);
   await page.mouse.move(from.x, from.y);
   await page.mouse.down();
   await page.mouse.move(to.x, to.y, { steps: 8 });
@@ -235,13 +245,13 @@ export async function sliderTo(scope: Locator, label: RegExp, where: "min" | "ma
   await thumb.press(where === "max" ? "End" : "Home");
 }
 
-/** Drags between two points given as fractions of the target's box (mouse on desktop, touch on phones). */
+/** Drags between two points given as fractions of the target's box (mouse on desktop, touch on phones where possible). */
 export async function dragFrac(page: Page, target: Locator, from: [number, number], to: [number, number]) {
   await target.scrollIntoViewIfNeeded();
   const box = (await target.boundingBox())!;
   const a = { x: box.x + box.width * from[0], y: box.y + box.height * from[1] };
   const b = { x: box.x + box.width * to[0], y: box.y + box.height * to[1] };
-  if (isMobile(page)) return touchDrag(page, a, b);
+  if (canTouchDrag(page)) return touchDrag(page, a, b);
   await page.mouse.move(a.x, a.y);
   await page.mouse.down();
   await page.mouse.move(b.x, b.y, { steps: 8 });

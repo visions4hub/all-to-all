@@ -59,6 +59,11 @@ function resultNotes(report: CompressReport): Localized[] {
   const notes: Localized[] = [];
   if (report.imagesSkipped === "encrypted")
     notes.push({ ar: "الملف مشفّر، لذا لم تُغيَّر الصور وبقي التشفير كما هو.", en: "The file is encrypted, so images weren't changed and the encryption was kept." });
+  if (report.imagesSkipped === "browser")
+    notes.push({
+      ar: "لم يُعَد ضغط الصور: هذا المتصفح لا يدعم ترميز الصور في الخلفية (OffscreenCanvas، مثل Safari الأقدم من 16.4). طُبّق التحسين دون فقد فقط؛ استخدم متصفحاً أحدث لإعادة ضغط الصور.",
+      en: "Images weren't recompressed: this browser can't encode images in the background (OffscreenCanvas, e.g. Safari older than 16.4). Only lossless optimisation was applied; use a newer browser to recompress images.",
+    });
   if (report.imagesSkipped === "unsupported")
     notes.push({ ar: "تعذّرت إعادة ضغط الصور في هذا الملف؛ طُبّق التحسين دون فقد فقط.", en: "Images in this file couldn't be recompressed; only lossless optimisation was applied." });
   if (report.images && report.images.found > 0 && report.images.recompressed === 0)
@@ -87,6 +92,7 @@ export function compressionOutput(
   if (!smaller || !verified) {
     const why = smaller ? COMPRESS_MESSAGES.verifyFailed : COMPRESS_MESSAGES.noSavings;
     meta.push({ label: { ar: "النتيجة", en: "Result" }, value: why[locale] });
+    if (report.imagesSkipped) for (const note of resultNotes(report)) meta.push({ label: { ar: "ملاحظة", en: "Note" }, value: note[locale] });
     return { name: input.name, blob: new Blob([original as Uint8Array<ArrayBuffer>], { type: "application/pdf" }), sourceIds: [input.id], meta };
   }
 

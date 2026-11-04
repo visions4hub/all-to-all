@@ -4,7 +4,7 @@ Statuses: **Operational** (built, output verified by tests) · **Implemented, no
 
 Last update: 4 November 2026 — Milestones 1–4 merged into `main`. All 28 Phase 1 tools and the workflow builder are operational.
 
-Detailed per-tool evidence: [verification/image-tools.md](verification/image-tools.md), [verification/pdf-tools.md](verification/pdf-tools.md) and [verification/workflows.md](verification/workflows.md).
+Detailed per-tool evidence: [verification/image-tools.md](verification/image-tools.md), [verification/pdf-tools.md](verification/pdf-tools.md) and [verification/workflows.md](verification/workflows.md). Cross-browser results: [verification/browsers.md](verification/browsers.md).
 
 ## Combined check on `main` after merging Milestone 4
 
@@ -44,7 +44,7 @@ Earlier (Milestones 2–3 merge): one test (Photo Editor, English WebP export) f
 
 ### Known issues
 
-- Browser tests run in Chromium only; Firefox and Safari have not been tested automatically.
+- Browser tests run in Chromium, Firefox, desktop Safari and iPhone Safari (Playwright WebKit) — see [verification/browsers.md](verification/browsers.md). Real Safari / a real iPhone have not been tested (Windows machine).
 - Next.js 16.4 static export: the client requests segment prefetch files as `/<route>/__next.<route>.__PAGE__.txt`, but the export writes them as `/<route>/__next.<route>/__PAGE__.txt`. The browser console shows 404s for these prefetches. Navigation is unaffected (verified: client-side navigation works and keeps in-memory files). Re-check after the next Next.js update.
 - First paint is Arabic; visitors who chose English see the text switch to English right after load (direction and theme are applied before paint).
 

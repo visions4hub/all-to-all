@@ -1,7 +1,9 @@
 "use client";
 
-import { useId } from "react";
+import { useEffect, useId } from "react";
+import { readImageSize } from "@/lib/files/image-info";
 import { useT } from "@/lib/i18n";
+import { useWorkspace } from "@/stores/workspace";
 import type { PreviewProps, SettingsProps, ToolModule } from "@/tools/types";
 import { Field, Note, NumberField, Segmented, SelectField } from "./lib/controls";
 import { mmToPt } from "./lib/geometry";
@@ -94,12 +96,29 @@ function Settings({ settings: s, onChange, files, disabled }: SettingsProps<Imag
 /** Page mock-up using the same placement math as the real output. */
 function Preview({ settings, file }: PreviewProps<ImageToPdfSettings>) {
   const t = useT();
-  if (!file.width || !file.height || !file.previewUrl) {
+  const update = useWorkspace((st) => st.update);
+  const known = !!file.width && !!file.height;
+  // The file list reads sizes lazily when a thumbnail scrolls into view; on a short phone
+  // screen the list can be below the fold, so the previewed file is read here directly.
+  useEffect(() => {
+    if (known || file.previewError) return;
+    let live = true;
+    readImageSize(file.file)
+      .then((size) => live && update(file.id, size))
+      .catch(() => live && update(file.id, { previewError: "decode" }));
+    return () => {
+      live = false;
+    };
+  }, [known, file.id, file.file, file.previewError, update]);
+  if (file.previewError && !known) {
+    return <div className="flex aspect-[3/4] items-center justify-center rounded-xl bg-muted p-4 text-center text-sm text-muted-foreground">{t({ ar: "تعذّرت قراءة هذه الصورة في المتصفح.", en: "This browser couldn't read this image." })}</div>;
+  }
+  if (!known || !file.previewUrl) {
     return <div className="flex aspect-[3/4] items-center justify-center rounded-xl bg-muted text-sm text-muted-foreground">{t({ ar: "جارٍ قراءة الصورة…", en: "Reading the image…" })}</div>;
   }
   // The browser shows images upright (EXIF applied), so these are displayed sizes.
-  const [pw, ph] = pageSizeFor(settings, file.width, file.height);
-  const { rect, clip } = placeImage(settings.fit, [pw, ph], mmToPt(Math.max(0, settings.margin)), file.width, file.height);
+  const [pw, ph] = pageSizeFor(settings, file.width!, file.height!);
+  const { rect, clip } = placeImage(settings.fit, [pw, ph], mmToPt(Math.max(0, settings.margin)), file.width!, file.height!);
   const pct = (v: number, of: number) => `${(v / of) * 100}%`;
   return (
     <div className="space-y-3">

@@ -19,8 +19,11 @@ export type CompressReport = {
   encryption: "none" | "no-password";
   /** Null when the image option was off or couldn't run. */
   images: ImageStats | null;
-  /** Why the image option didn't run although it was on. */
-  imagesSkipped: "encrypted" | "unsupported" | null;
+  /**
+   * Why the image option didn't run although it was on: "browser" = this browser
+   * can't encode images in a worker (no OffscreenCanvas, e.g. Safari before 16.4).
+   */
+  imagesSkipped: "encrypted" | "unsupported" | "browser" | null;
   /** The file's structure was damaged and had to be rebuilt. */
   repaired: boolean;
 };

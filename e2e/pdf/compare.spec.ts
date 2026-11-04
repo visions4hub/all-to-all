@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { chromium, expect, test, type Page } from "@playwright/test";
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import { closeSettings, downloadResult, L, openSettings, openTool, pdfUpload, runTool, upload, type Locale } from "./helpers";
 
@@ -19,19 +19,29 @@ async function englishPair() {
   };
 }
 
-/** Arabic PDFs printed by Chromium itself, so the text layer is real shaped Arabic. */
+/**
+ * Arabic PDFs printed by Chromium itself, so the text layer is real shaped Arabic.
+ * page.pdf() exists only in Chromium, so in Firefox/WebKit runs the fixture is printed
+ * by a separate headless Chromium; the tool under test still runs in the project's browser.
+ */
 async function arabicPair(page: Page) {
+  const own = page.context().browser()?.browserType().name() === "chromium";
+  const printer = own ? null : await chromium.launch();
   const print = async (body: string) => {
-    const p = await page.context().newPage();
+    const p = printer ? await printer.newPage() : await page.context().newPage();
     await p.setContent(`<html dir="rtl" lang="ar"><body style="font-family: Tahoma, Arial, sans-serif; font-size: 22px; padding: 40px">${body}</body></html>`);
     const pdf = await p.pdf({ format: "A4" });
     await p.close();
     return pdf;
   };
-  return {
-    a: await print("<p>تقرير الطالب للفصل الأول</p><p>الدرجة النهائية ممتاز</p>"),
-    b: await print("<p>تقرير الطالب للفصل الثاني</p><p>الدرجة النهائية جيد جدا</p>"),
-  };
+  try {
+    return {
+      a: await print("<p>تقرير الطالب للفصل الأول</p><p>الدرجة النهائية ممتاز</p>"),
+      b: await print("<p>تقرير الطالب للفصل الثاني</p><p>الدرجة النهائية جيد جدا</p>"),
+    };
+  } finally {
+    await printer?.close();
+  }
 }
 
 const preview = (page: Page) => page.locator("main");

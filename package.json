@@ -12,8 +12,12 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test",
-    "test:e2e:pdf": "playwright test -c playwright.pdf.config.ts"
+    "test:e2e": "playwright test --project=desktop --project=mobile",
+    "test:e2e:all": "playwright test",
+    "test:e2e:firefox": "playwright test --project=firefox-desktop",
+    "test:e2e:webkit": "playwright test --project=webkit-desktop --project=webkit-iphone",
+    "test:e2e:pdf": "playwright test -c playwright.pdf.config.ts --project=desktop --project=mobile",
+    "test:e2e:pdf:all": "playwright test -c playwright.pdf.config.ts"
   },
   "dependencies": {
     "@neslinesli93/qpdf-wasm": "0.3.0",

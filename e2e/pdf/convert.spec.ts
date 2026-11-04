@@ -20,6 +20,16 @@ for (const locale of ["ar", "en"] as Locale[]) {
   });
 }
 
+test("image to PDF: the page preview appears on a short phone screen (file list below the fold)", async ({ page }) => {
+  // Regression: sizes were only read when a file thumbnail scrolled into view, so on a
+  // 600 px tall phone the preview stayed on "Reading the image…".
+  if (test.info().project.use.isMobile) await page.setViewportSize({ width: page.viewportSize()!.width, height: 600 });
+  await openTool(page, "image-to-pdf", "en");
+  const images = await makeImages(page);
+  await upload(page, images.slice(0, 1));
+  await expect(page.getByText("297 × 210 mm")).toBeVisible();
+});
+
 test("image to PDF: separate files, original size, no margin", async ({ page }) => {
   await openTool(page, "image-to-pdf");
   const images = await makeImages(page);

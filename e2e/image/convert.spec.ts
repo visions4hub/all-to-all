@@ -20,6 +20,30 @@ test.describe("Convert Image", () => {
     expect(info.pixels[1][1]).toBeLessThan(30);
   });
 
+  test("a browser without a WebP encoder (like Safari) is told so up front and on processing", async ({ page }) => {
+    // Safari's canvas.toBlob("image/webp") silently returns a PNG. Playwright's WebKit build
+    // can encode WebP, so the Safari behaviour is reproduced here in every browser.
+    await page.addInitScript(() => {
+      const original = HTMLCanvasElement.prototype.toBlob;
+      HTMLCanvasElement.prototype.toBlob = function (cb, type, quality) {
+        return original.call(this, cb, type === "image/webp" ? "image/png" : type, quality);
+      };
+    });
+    await useEnglish(page);
+    await openTool(page, "convert-image");
+    const png = await makeImage(page, { width: 80, height: 60, pattern: "quadrants", format: "png" });
+    await upload(page, [fixture("q.png", png)]);
+    const panel = await settings(page);
+    await panel.getByRole("radio", { name: "WebP" }).click();
+    await expect(panel.getByTestId("webp-unsupported")).toContainText("can't save images as WebP");
+    await panel.getByRole("radio", { name: "JPG" }).click();
+    await expect(panel.getByTestId("webp-unsupported")).toHaveCount(0);
+    await panel.getByRole("radio", { name: "WebP" }).click();
+    await run(page, ACTION);
+    await expect(page.getByRole("heading", { name: "Processing failed" })).toBeVisible();
+    await expect(page.getByText("This browser can't save images as WebP. Choose another format such as JPG or PNG.").first()).toBeVisible();
+  });
+
   test("PNG → WebP keeps transparency; JPG → PNG", async ({ page }) => {
     await openTool(page, "convert-image");
     const png = await makeImage(page, { width: 120, height: 120, pattern: "transparent-square", format: "png" });
