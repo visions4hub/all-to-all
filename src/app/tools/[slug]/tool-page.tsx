@@ -73,7 +73,7 @@ export function ToolPage({ slug }: { slug: string }) {
                 <span>
                   {t({ ar: "الناتج:", en: "Output:" })} <span dir="ltr">{tool.outputs.join(" · ")}</span>
                 </span>
-                <span className="inline-flex items-center gap-1 text-teal">
+                <span className="inline-flex items-center gap-1 text-gold">
                   <ShieldCheck className="size-3.5" />
                   {t({ ar: "بدون رفع ملفات", en: "No uploads" })}
                 </span>

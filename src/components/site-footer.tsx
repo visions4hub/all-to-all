@@ -28,7 +28,7 @@ export function SiteFooter() {
           <p className="mt-4 text-sm leading-7 text-muted-foreground">
             {t({ ar: "كل ملفاتك. كل أدواتك. بمكان واحد.", en: "Every File. Every Tool. One Place." })}
           </p>
-          <p className="mt-4 inline-flex items-center gap-2 rounded-full bg-teal-soft px-3 py-1.5 text-xs font-medium text-teal">
+          <p className="mt-4 inline-flex items-center gap-2 rounded-full border border-gold/25 bg-brand-soft px-3 py-1.5 text-xs font-medium text-gold">
             <ShieldCheck className="size-4" aria-hidden />
             {t({ ar: "ملفاتك لا تغادر جهازك", en: "Your files never leave your device" })}
           </p>

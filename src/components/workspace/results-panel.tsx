@@ -84,7 +84,7 @@ export function ResultsPanel({
         <span
           className={cn(
             "flex size-10 items-center justify-center rounded-full",
-            outputs.length ? "bg-teal-soft text-teal" : "bg-destructive/10 text-destructive",
+            outputs.length ? "bg-brand-soft text-gold ring-1 ring-gold/25 ring-inset" : "bg-destructive/10 text-destructive",
           )}
         >
           {outputs.length ? <CheckCircle2 className="size-5" /> : <AlertCircle className="size-5" />}

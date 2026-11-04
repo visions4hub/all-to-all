@@ -77,8 +77,9 @@
   --pdf-soft: #2e1a14;
   --success: #7fd1a6;
   --warning: #e8b95a;
-  --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.4), 0 10px 28px -16px rgb(0 0 0 / 0.7);
-  --shadow-lift: 0 2px 4px rgb(0 0 0 / 0.4), 0 24px 48px -22px rgb(217 182 92 / 0.22);
+  /* A faint warm highlight on the top edge plus a deep, soft drop: lit metal on black. */
+  --shadow-soft: inset 0 1px 0 rgb(255 236 190 / 0.05), 0 1px 2px rgb(0 0 0 / 0.5), 0 16px 36px -20px rgb(0 0 0 / 0.9);
+  --shadow-lift: inset 0 1px 0 rgb(255 236 190 / 0.08), 0 2px 4px rgb(0 0 0 / 0.5), 0 24px 50px -22px rgb(217 182 92 / 0.28);
 }
 
 @layer base {

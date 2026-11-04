@@ -79,7 +79,7 @@ export function ToolIcon({
     <span
       className={cn(
         "inline-flex shrink-0 items-center justify-center rounded-xl",
-        category === "pdf" ? "bg-pdf-soft text-pdf" : "bg-teal-soft text-teal",
+        "bg-brand-soft text-gold ring-1 ring-gold/20 ring-inset",
         size === "sm" && "size-8 [&_svg]:size-4",
         size === "md" && "size-11 [&_svg]:size-5",
         size === "lg" && "size-14 rounded-2xl [&_svg]:size-7",

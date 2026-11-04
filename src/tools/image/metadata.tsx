@@ -176,7 +176,7 @@ function Preview({ file }: PreviewProps<MetadataSettings>) {
             </>
           ) : (
             <p className="flex items-center gap-2">
-              <ShieldCheck className="size-4 text-teal" />
+              <ShieldCheck className="size-4 text-gold" />
               {t({ ar: "لا توجد بيانات وصفية في هذا الملف.", en: "This file has no metadata." })}
             </p>
           )}

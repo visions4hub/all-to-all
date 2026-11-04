@@ -36,7 +36,7 @@ export function ToolCard({ tool, compact = false }: { tool: ToolDefinition; comp
   );
 
   const base = cn(
-    "group relative flex h-full flex-col rounded-2xl border bg-card text-start",
+    "group relative flex h-full flex-col rounded-2xl border border-gold/15 bg-card text-start",
     compact ? "p-4" : "p-5",
   );
 
@@ -50,7 +50,7 @@ export function ToolCard({ tool, compact = false }: { tool: ToolDefinition; comp
   return (
     <Link
       href={`/tools/${tool.slug}/`}
-      className={cn(base, "shadow-soft hover:border-gold/50 hover:shadow-lift focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none")}
+      className={cn(base, "shadow-soft hover:border-gold/55 hover:shadow-lift focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none")}
     >
       {body}
     </Link>

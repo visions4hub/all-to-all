@@ -3,7 +3,8 @@
 //   public/brand/mark.png       the knot, transparent background
 //   public/brand/wordmark.png   "ALL TO ALL / BY VISIONS", transparent background
 //   public/brand/app-icon.png   the rounded black app icon, as drawn (512 px)
-//   public/icon-*.png, public/apple-touch-icon.png, public/favicon.ico source sizes
+//   public/icon-*.png, public/apple-touch-icon.png   browser and phone icons
+//   public/og.jpg                link preview (WhatsApp, Telegram, X…)
 // Run with: node scripts/build-brand.mjs   (outputs are committed; not part of the build)
 import sharp from "sharp";
 import { mkdirSync } from "node:fs";
@@ -53,5 +54,15 @@ await icon.clone().resize(192, 192).png().toFile("public/icon-192.png");
 await icon.clone().resize(180, 180).png().toFile("public/apple-touch-icon.png");
 await icon.clone().resize(48, 48).png().toFile("public/icon-48.png");
 await icon.clone().resize(32, 32).png().toFile("public/icon-32.png");
+
+// Link preview (Open Graph, 1200×630): the whole artwork, letterboxed on its own black,
+// so nothing is cropped.
+await sharp(SRC)
+  .resize(1200, 630, { fit: "contain", background: "#090908" })
+  .jpeg({ quality: 88, mozjpeg: true })
+  .toFile("public/og.jpg"); // JPEG keeps it under ~300 KB, which some apps (WhatsApp) need
+
+// GitHub social preview (1280×640, the artwork is already 2:1).
+await sharp(SRC).resize(1280, 640, { fit: "contain", background: "#090908" }).png().toFile("assets/social-preview.png");
 
 console.log("Brand files written to public/brand and public/");

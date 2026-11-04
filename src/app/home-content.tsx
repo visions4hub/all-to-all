@@ -214,7 +214,7 @@ export function HomeContent() {
         <div className="grid gap-x-8 gap-y-2 rounded-2xl border bg-card p-6 sm:grid-cols-2 lg:grid-cols-4">
           {ALL_TOOLS.map((tool) => (
             <p key={tool.id} className="flex items-center gap-2 text-sm">
-              <span className={tool.category === "pdf" ? "size-1.5 rounded-full bg-pdf" : "size-1.5 rounded-full bg-teal"} />
+              <span className="size-1.5 rotate-45 bg-gold" />
               <span className={tool.status === "operational" || tool.status === "beta" ? "" : "text-muted-foreground"}>{t(tool.name)}</span>
             </p>
           ))}
@@ -261,7 +261,7 @@ export function HomeContent() {
         <div className="overflow-hidden rounded-3xl border bg-card">
           <div className="grid gap-8 p-6 sm:p-10 lg:grid-cols-[1fr_1.2fr] lg:items-center">
             <div>
-              <span className="inline-flex size-12 items-center justify-center rounded-2xl bg-teal-soft text-teal">
+              <span className="inline-flex size-12 items-center justify-center rounded-2xl bg-brand-soft text-gold ring-1 ring-gold/20 ring-inset">
                 <ShieldCheck className="size-6" />
               </span>
               <h2 className="mt-5 text-2xl font-bold sm:text-3xl">{t({ ar: "ملفاتك لا تغادر جهازك", en: "Your files never leave your device" })}</h2>
@@ -286,7 +286,7 @@ export function HomeContent() {
                 { icon: Sparkles, text: { ar: "نتائج حقيقية، بدون محاكاة", en: "Real results, never simulated" } },
               ].map((x) => (
                 <li key={x.text.en} className="flex items-center gap-3 rounded-xl bg-muted/60 p-3 text-sm font-medium">
-                  <x.icon className="size-5 shrink-0 text-teal" />
+                  <x.icon className="size-5 shrink-0 text-gold" />
                   {t(x.text)}
                 </li>
               ))}

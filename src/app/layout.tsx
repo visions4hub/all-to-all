@@ -29,6 +29,22 @@ export const metadata: Metadata = {
   description:
     "أدوات احترافية لتحويل وتعديل وتنظيم ملفات PDF والصور داخل متصفحك. مجاناً، بدون تسجيل، وبدون رفع ملفاتك إلى أي خادم.",
   applicationName: "All To All",
+  metadataBase: new URL("https://all-to-all.pages.dev"),
+  openGraph: {
+    type: "website",
+    siteName: "All To All — By Visions",
+    locale: "ar_IQ",
+    url: "/",
+    title: "All To All — كل ملفاتك. كل أدواتك. بمكان واحد.",
+    description: "أدوات PDF والصور داخل متصفحك. مجاناً، بدون تسجيل، وبدون رفع ملفاتك.",
+    images: [{ url: "/og.jpg", width: 1200, height: 630, alt: "All To All — By Visions" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "All To All — By Visions",
+    description: "أدوات PDF والصور داخل متصفحك. مجاناً، بدون تسجيل، وبدون رفع ملفاتك.",
+    images: ["/og.jpg"],
+  },
   authors: [{ name: "Visions" }],
   icons: {
     icon: [

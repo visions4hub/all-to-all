@@ -457,7 +457,7 @@ export function WorkflowBuilder() {
               </div>
             )}
             <p className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
-              <ShieldCheck className="size-3.5 text-teal" />
+              <ShieldCheck className="size-3.5 text-gold" />
               {t({ ar: "كل الخطوات تعمل على جهازك", en: "Every step runs on your device" })}
             </p>
           </div>

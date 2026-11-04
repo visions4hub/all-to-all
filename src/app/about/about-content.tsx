@@ -20,7 +20,7 @@ const PRINCIPLES: Principle[] = [
   },
   {
     icon: UserX,
-    tone: "bg-teal-soft text-teal",
+    tone: "bg-brand-soft text-gold",
     title: { ar: "بلا حساب", en: "No account" },
     body: {
       ar: "لا تسجيل ولا تسجيل دخول. افتح الأداة واستخدمها مباشرة، دون أن نطلب منك بريداً أو اسماً.",
@@ -29,7 +29,7 @@ const PRINCIPLES: Principle[] = [
   },
   {
     icon: Laptop,
-    tone: "bg-pdf-soft text-pdf",
+    tone: "bg-brand-soft text-gold",
     title: { ar: "معالجة محلية", en: "Local processing" },
     body: {
       ar: "كل أداة تعمل داخل متصفحك. ملفاتك لا تُرفع إلى أي خادم، ولا يوجد لدينا خادم أصلاً يستقبلها.",

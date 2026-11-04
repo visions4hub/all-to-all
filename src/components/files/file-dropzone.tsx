@@ -87,8 +87,8 @@ export function FileDropzone({
         take(e.dataTransfer.files);
       }}
       className={cn(
-        "relative flex flex-col items-center justify-center rounded-3xl border-2 border-dashed text-center",
-        dragging ? "border-gold bg-brand-soft" : "border-border bg-card hover:border-gold/50",
+        "relative flex flex-col items-center justify-center rounded-3xl border text-center shadow-soft",
+        dragging ? "border-gold bg-brand-soft" : "border-gold/25 bg-card hover:border-gold/55",
         hero && "px-6 py-12 sm:py-16",
         size === "default" && "px-6 py-10",
         compact && "rounded-2xl px-4 py-5",
@@ -125,7 +125,7 @@ export function FileDropzone({
       {!compact && (
         <span
           className={cn(
-            "mb-5 flex items-center justify-center rounded-2xl bg-brand-soft text-primary",
+            "mb-5 flex items-center justify-center rounded-2xl bg-brand-soft text-gold ring-1 ring-gold/25 ring-inset",
             hero ? "size-16" : "size-12",
           )}
           aria-hidden
