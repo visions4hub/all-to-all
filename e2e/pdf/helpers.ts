@@ -31,10 +31,16 @@ export async function upload(page: Page, files: Upload[]) {
 /** Labels are bilingual; pick by the current locale. */
 export const L = (locale: Locale, ar: string, en: string) => (locale === "ar" ? ar : en);
 
-/** On phones the settings live in a bottom sheet. Opens it when needed. */
+/**
+ * On phones the settings live in a bottom sheet. Opens it when needed.
+ * The layout is chosen by viewport width (the workspace switches at Tailwind's lg, 1024px),
+ * not by whether the button is visible at this instant: right after an upload the sticky
+ * bar may not have rendered yet, and a visibility check would wrongly pick the desktop sidebar.
+ */
 export async function openSettings(page: Page, locale: Locale) {
-  const mobileButton = page.locator(".sticky.bottom-0").getByRole("button", { name: L(locale, "الإعدادات", "Settings") });
-  if (await mobileButton.isVisible()) {
+  const phoneLayout = (page.viewportSize()?.width ?? 1280) < 1024;
+  if (phoneLayout) {
+    const mobileButton = page.locator(".sticky.bottom-0").getByRole("button", { name: L(locale, "الإعدادات", "Settings") });
     await mobileButton.click();
     await expect(page.getByRole("dialog")).toBeVisible();
     return page.getByRole("dialog");
