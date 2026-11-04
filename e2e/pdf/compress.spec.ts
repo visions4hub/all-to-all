@@ -160,6 +160,21 @@ test("compress: optional image recompression downsamples photos, text stays text
   await settings.getByRole("switch", { name: "إعادة ضغط الصور أيضاً (بفقد في الجودة)" }).click();
   await expect(settings.getByText("هذا الخيار يفقد جزءاً من جودة الصور")).toBeVisible();
   await settings.getByRole("radio", { name: "72 DPI" }).click();
+  // Image recompression needs OffscreenCanvas in the worker. Playwright's WebKit build (and
+  // Safari before 16.4) lacks it: the tool must say so up front and in the result, and only
+  // the lossless step runs.
+  const canvasOk = await page.evaluate(() => typeof OffscreenCanvas !== "undefined");
+  if (!canvasOk) {
+    await expect(settings.getByTestId("images-unsupported")).toContainText("هذا المتصفح لا يدعم إعادة ضغط الصور");
+    await closeSettings(page);
+    await runTool(page, "ضغط PDF");
+    await expect(results(page)).toContainText("لم يُعَد ضغط الصور: هذا المتصفح لا يدعم ترميز الصور");
+    const kept = await downloadResult(page, "ar");
+    expect(kept.bytes.length).toBeLessThanOrEqual(input.length);
+    expect(imagesOf(await loadPdf(kept.bytes)).map((i) => i.width)).toEqual([3000, 1600]);
+    return;
+  }
+  await expect(settings.getByTestId("images-unsupported")).toHaveCount(0);
   await closeSettings(page);
   await runTool(page, "ضغط PDF");
   const out = await downloadResult(page, "ar");

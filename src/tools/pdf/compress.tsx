@@ -1,5 +1,6 @@
 "use client";
 
+import { useSyncExternalStore } from "react";
 import { useT } from "@/lib/i18n";
 import { openPdf } from "@/lib/pdf/pdfjs";
 import type { SettingsProps, ToolModule } from "@/tools/types";
@@ -12,8 +13,19 @@ import type { PdfOpener } from "./lib/text-extract";
 
 const opener: PdfOpener = (data) => openPdf(data);
 
+/** Image recompression runs in a worker with OffscreenCanvas (missing in Safari before 16.4). Null until checked. */
+const noSubscribe = () => () => {};
+function useWorkerCanvas(): boolean | null {
+  return useSyncExternalStore(
+    noSubscribe,
+    () => typeof OffscreenCanvas !== "undefined" && typeof createImageBitmap === "function",
+    () => null,
+  );
+}
+
 function Settings({ settings: s, onChange, disabled }: SettingsProps<CompressSettings>) {
   const t = useT();
+  const canvasOk = useWorkerCanvas();
   return (
     <div className="space-y-4">
       <Note>
@@ -29,6 +41,16 @@ function Settings({ settings: s, onChange, disabled }: SettingsProps<CompressSet
         label={t({ ar: "إعادة ضغط الصور أيضاً (بفقد في الجودة)", en: "Also recompress images (lossy)" })}
         hint={t({ ar: "يوفّر أكثر في الملفات المليئة بالصور، لكنه يخفّض جودة الصور.", en: "Saves more on image-heavy files, but lowers image quality." })}
       />
+      {s.images && canvasOk === false && (
+        <Note tone="warning">
+          <span data-testid="images-unsupported">
+            {t({
+              ar: "هذا المتصفح لا يدعم إعادة ضغط الصور (OffscreenCanvas، مثل Safari الأقدم من 16.4)، لذا سيُطبَّق التحسين دون فقد فقط.",
+              en: "This browser can't recompress images (OffscreenCanvas, e.g. Safari older than 16.4), so only lossless optimisation will run.",
+            })}
+          </span>
+        </Note>
+      )}
       {s.images && (
         <>
           <Field label={t({ ar: "أقصى دقة للصور", en: "Maximum image resolution" })} hint={t({ ar: "الصور الأكبر من هذه الدقة بالنسبة لحجم الصفحة تُصغَّر.", en: "Images sharper than this for the page size are scaled down." })}>

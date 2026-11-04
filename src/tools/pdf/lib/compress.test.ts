@@ -193,6 +193,16 @@ describe("optional image recompression (lossy)", () => {
     expect((await imageOf(bytes, "Photo")).width).toBe(2400);
   });
 
+  it("without an image codec (browser lacks OffscreenCanvas) images are left alone and the reason is shown", async () => {
+    const photo = await makePhotoPdf();
+    const { report, bytes } = await compressPdfBytes(photo, { images: true, maxDpi: 72, quality: 75 }, { qpdf: nodeQpdf });
+    expect(report).toMatchObject({ images: null, imagesSkipped: "browser" });
+    expect((await imageOf(bytes, "Photo")).width).toBe(2400);
+    // The note is shown whether or not the lossless step made the file smaller.
+    const out = compressionOutput(asInput(photo, "p.pdf"), photo, photo, report, null, "en");
+    expect(out.meta?.find((m) => m.label.en === "Note")?.value).toContain("this browser can't encode images");
+  });
+
   it("doesn't touch small images, masks or images it can't decode exactly", async () => {
     const { bytes } = await makeBloatedPdf();
     // 800×800 on A4 at 300 dpi needs 3508 px, so the image isn't resized; Flate re-encode
