@@ -2,27 +2,43 @@
 
 Statuses: **Operational** (built, output verified by tests) · **Implemented, not fully verified** · **Unsupported in Phase 1** · **Deferred to Phase 2** · **Not started**.
 
-Last update: 4 November 2026 — Milestones 1–4 merged into `main`. All 28 Phase 1 tools and the workflow builder are operational.
+Last update: 4 November 2026 — **Phase 1 complete.** Milestones 1–5 merged into `main`. All 28 Phase 1 tools and the workflow builder are operational, verified in Chromium, Firefox and WebKit (Safari engine).
 
-Detailed per-tool evidence: [verification/image-tools.md](verification/image-tools.md), [verification/pdf-tools.md](verification/pdf-tools.md) and [verification/workflows.md](verification/workflows.md). Cross-browser results: [verification/browsers.md](verification/browsers.md).
+Detailed evidence: [image tools](verification/image-tools.md) · [PDF tools](verification/pdf-tools.md) · [workflows](verification/workflows.md) · [browsers](verification/browsers.md) · [performance](verification/performance.md) · [deploying](DEPLOY.md).
 
-## Combined check on `main` after merging Milestone 4
+## Final check on `main` (Phase 1 release candidate)
 
 | Check | Result |
 |---|---|
 | `npm run typecheck` | Clean |
 | `npm run lint` | Clean |
-| `npm test` (Vitest) | 393 passed, 27 files |
-| `npm run build` | 41 static pages |
-| `npx playwright test` (desktop 1366 px + mobile 375 px, Chromium) | 261 passed, 3 skipped (touch-only / desktop-only cases) |
-| Manual browser check | Merge PDF with an Arabic filename (2 + 3 pages → 5), Photo Editor at 375 px |
+| `npm test` (Vitest) | 409 passed, 31 files |
+| `npm run build` | 41 static pages, static export |
+| `npm run test:e2e:all` (Playwright: Chromium desktop + phone, Firefox, WebKit desktop, WebKit iPhone) | **697 passed, 0 failed**, 8 skipped (each for a stated device limit, listed in [browsers.md](verification/browsers.md)) |
+| `npm audit --omit=dev` | 0 vulnerabilities |
+| Security headers / CSP | Every test runs under the real policy; `e2e/security.spec.ts` proves the page can't send data to another server or load outside scripts |
+
+### Milestone 5 summary
+
+- **Browsers:** Firefox, desktop Safari and iPhone Safari (WebKit) added to the suite. Product fixes: clear messages when a browser can't encode WebP or recompress PDF images; iPhone safe-area padding for bottom bars and sheets; Image to PDF reads image size directly.
+- **Performance:** first-load JS on every tool page 274.5 → 201.2 KB gzip (−27%), Studio −22%, workflows −21%; layout shift on tool pages and saved-English visits is now 0; previews of large photos use small thumbnails (much lower memory); fewer main-thread freezes on big files. Details and before/after numbers in [performance.md](verification/performance.md).
+- **Security:** CSP `<meta>` in every page plus generated `_headers` (frame-ancestors, X-Frame-Options, Referrer-Policy, Permissions-Policy, COOP/CORP, caching) from one source (`src/lib/security/headers.json`); `connect-src 'self'`; JSZip no longer ships a Node polyfill that probed `eval`; build-only `shadcn` moved to devDependencies.
+- **Release:** generated third-party license notices (linked in the footer), CI workflow, `.nvmrc`, deploy guide.
+
+### Not verified (needs a person or real devices)
+
+- Real Safari on a Mac and a real iPhone/Android phone — tests use the WebKit engine and device emulation, not physical devices.
+- Screen-reader walk-through (automated checks and Lighthouse accessibility 92–98 only).
+- Deployment itself: nothing is pushed or published yet.
+
+### Earlier merge notes
 
 Fixed while merging Milestone 4 (found by new tests):
 
 - On phones, the page became wider than the screen **after processing** in every tool (result card min-width). Fixed in `results-panel.tsx`; regression test added.
-- On phones, a long filename that can't wrap made tool pages and the Studio wider than the screen **before processing** (single-column grid sized to content). Fixed by capping the column (`minmax(0,1fr)`) in `tool-workspace.tsx` and `studio-content.tsx`; checked on all tool pages and covered by tests for `/`, `/studio/`, `/workflows/` and the results panel.
+- On phones, a long filename that can't wrap made tool pages and the Studio wider than the screen **before processing** (single-column grid sized to content). Fixed by capping the column (`minmax(0,1fr)`) in `tool-workspace.tsx` and `studio-content.tsx`; covered by tests.
 
-Earlier (Milestones 2–3 merge): one test (Photo Editor, English WebP export) failed once in the first full run and then passed in 3 later full runs and 15 targeted repeats; treated as a timing flake under load, kept under watch.
+Milestones 2–3 merge: one Photo Editor test failed once under load and passed in every later run; no failures in the final 697-test run.
 
 ## Milestone 1 — Foundation
 
