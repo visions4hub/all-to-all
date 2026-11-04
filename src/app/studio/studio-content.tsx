@@ -56,7 +56,7 @@ export function StudioContent() {
         {files.length === 0 ? (
           <FileDropzone size="hero" enableCamera onFiles={(f) => void addFiles(f)} />
         ) : (
-          <div className="grid gap-4 lg:grid-cols-[320px_minmax(0,1fr)] lg:items-start">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-[320px_minmax(0,1fr)] lg:items-start">
             <aside className="space-y-3 rounded-2xl border bg-card p-3 lg:sticky lg:top-20">
               <FileListToolbar count={files.length} totalSize={files.reduce((n, f) => n + f.size, 0)} />
               <FileList files={files} selectedId={active?.id} onSelect={setSelectedId} className="max-h-[55vh] overflow-y-auto" />
@@ -69,7 +69,7 @@ export function StudioContent() {
               )}
             </aside>
             {active && (
-              <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_300px]">
+              <section className="grid grid-cols-[minmax(0,1fr)] gap-4 xl:grid-cols-[minmax(0,1fr)_300px]">
                 <div className="rounded-2xl border bg-card p-3">
                   <FileThumb file={active} fit="contain" className="aspect-[4/3] w-full rounded-xl" />
                   <p dir="auto" className="mt-3 truncate px-1 font-medium">

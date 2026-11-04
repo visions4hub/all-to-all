@@ -2,22 +2,27 @@
 
 Statuses: **Operational** (built, output verified by tests) · **Implemented, not fully verified** · **Unsupported in Phase 1** · **Deferred to Phase 2** · **Not started**.
 
-Last update: 4 November 2026 — Milestones 1–3 merged into `main`.
+Last update: 4 November 2026 — Milestones 1–4 merged into `main`. All 28 Phase 1 tools and the workflow builder are operational.
 
-Detailed per-tool evidence: [verification/image-tools.md](verification/image-tools.md) and [verification/pdf-tools.md](verification/pdf-tools.md).
+Detailed per-tool evidence: [verification/image-tools.md](verification/image-tools.md), [verification/pdf-tools.md](verification/pdf-tools.md) and [verification/workflows.md](verification/workflows.md).
 
-## Combined check on `main` after merging
+## Combined check on `main` after merging Milestone 4
 
 | Check | Result |
 |---|---|
 | `npm run typecheck` | Clean |
 | `npm run lint` | Clean |
-| `npm test` (Vitest) | 262 passed, 20 files |
+| `npm test` (Vitest) | 393 passed, 27 files |
 | `npm run build` | 41 static pages |
-| `npx playwright test` (desktop 1366 px + mobile 375 px, Chromium) | 183 passed, 3 skipped (touch-only / desktop-only cases) |
+| `npx playwright test` (desktop 1366 px + mobile 375 px, Chromium) | 261 passed, 3 skipped (touch-only / desktop-only cases) |
 | Manual browser check | Merge PDF with an Arabic filename (2 + 3 pages → 5), Photo Editor at 375 px |
 
-One test (Photo Editor, English WebP export) failed once in the first full run and then passed in 3 later full runs and 15 targeted repeats; treated as a timing flake under load, kept under watch.
+Fixed while merging Milestone 4 (found by new tests):
+
+- On phones, the page became wider than the screen **after processing** in every tool (result card min-width). Fixed in `results-panel.tsx`; regression test added.
+- On phones, a long filename that can't wrap made tool pages and the Studio wider than the screen **before processing** (single-column grid sized to content). Fixed by capping the column (`minmax(0,1fr)`) in `tool-workspace.tsx` and `studio-content.tsx`; checked on all tool pages and covered by tests for `/`, `/studio/`, `/workflows/` and the results panel.
+
+Earlier (Milestones 2–3 merge): one test (Photo Editor, English WebP export) failed once in the first full run and then passed in 3 later full runs and 15 targeted repeats; treated as a timing flake under load, kept under watch.
 
 ## Milestone 1 — Foundation
 
@@ -62,8 +67,8 @@ One test (Photo Editor, English WebP export) failed once in the first full run a
 | Extract PDF Text | 3 | Operational |
 | Fill PDF Forms | 3 | Operational |
 | Sign PDF (visual) | 3 | Operational |
-| Compress PDF | 4 | Not started |
-| Compare PDF | 4 | Not started |
+| Compress PDF | 4 | Operational |
+| Compare PDF | 4 | Operational |
 | Compress Image | 2 | Operational |
 | Resize Image | 2 | Operational |
 | Crop Image | 2 | Operational |
@@ -73,9 +78,9 @@ One test (Photo Editor, English WebP export) failed once in the first full run a
 | Watermark Image | 2 | Operational |
 | Meme Generator | 2 | Operational |
 | Blur & Pixelate | 2 | Operational |
-| Image Metadata | 4 | Not started |
-| GIF Maker | 4 | Not started |
-| Workflow builder | 4 | Not started |
+| Image Metadata | 4 | Operational |
+| GIF Maker | 4 | Operational |
+| Workflow builder | 4 | Operational |
 
 ## Unsupported in Phase 1
 

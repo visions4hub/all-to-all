@@ -170,7 +170,7 @@ export function ResultsPanel({
             const showCompare = !!urls[i] && !!source?.previewUrl && source.kind !== "pdf" && source.kind !== "svg";
             const { ext } = splitExtension(o.name);
             return (
-              <li key={i} className="flex flex-col gap-3 rounded-xl border bg-background/60 p-3">
+              <li key={i} className="flex min-w-0 flex-col gap-3 rounded-xl border bg-background/60 p-3">
                 {showCompare ? (
                   <CompareSlider beforeUrl={source!.previewUrl!} afterUrl={urls[i]!} className="aspect-[4/3]" />
                 ) : urls[i] ? (

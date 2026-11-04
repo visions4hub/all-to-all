@@ -114,7 +114,7 @@ export function ToolWorkspace<S>({ tool, module }: { tool: ToolDefinition; modul
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 lg:grid-cols-[300px_minmax(0,1fr)_320px] lg:items-start">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-[300px_minmax(0,1fr)_320px] lg:items-start">
         {/* Files */}
         <aside className="order-2 space-y-3 rounded-2xl border bg-card p-3 lg:order-1 lg:sticky lg:top-20">
           <FileListToolbar count={allFiles.length} totalSize={allFiles.reduce((n, f) => n + f.size, 0)} />

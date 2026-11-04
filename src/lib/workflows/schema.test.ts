@@ -76,7 +76,6 @@ describe("export / import JSON", () => {
     ["a step without a tool", wf([{ settings: {} }]), "Step 1 in “Test” is invalid"],
     ["an unknown tool", wf([{ tool: "rm-rf" }]), "unknown or non-chainable tool: “rm-rf”"],
     ["an interactive tool", wf([{ tool: "resize-image" }, { tool: "photo-editor" }]), "Step 2 in “Test” uses an unknown or non-chainable tool: “photo-editor”"],
-    ["a tool that isn't built yet", wf([{ tool: "gif-maker" }]), "non-chainable tool"],
     ["a tool slug with odd characters", wf([{ tool: "../resize-image" }]), "unknown or non-chainable"],
     ["settings that are an array", wf([{ tool: "merge-pdf", settings: [1] }]), "settings of step 1"],
     ["settings with __proto__", wf([{ tool: "resize-image", settings: JSON.parse('{"__proto__": {"polluted": true}}') }]), "settings of step 1"],
