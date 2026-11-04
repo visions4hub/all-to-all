@@ -96,17 +96,24 @@ test("edit PDF: freehand, arrow, highlight, delete with keyboard", async ({ page
   await upload(page, [pdfUpload("doc.pdf", await makePdf(1))]);
   const area = page.getByRole("application", { name: "Editing area" });
   await expect(area).toBeVisible();
-  // Bring the whole page into view, as a person would scroll to it: the mouse can only
-  // draw on the part of the page that is on screen.
-  await area.evaluate((el) => el.scrollIntoView({ block: "center" }));
-  const b = (await area.boundingBox())!;
-  await page.getByRole("button", { name: "Freehand" }).click();
-  const at = (fx: number, fy: number): [number, number] => [b.x + b.width * fx, b.y + b.height * fy];
-  await drag(page, at(0.1, 0.1), at(0.4, 0.2));
-  await page.getByRole("button", { name: "Arrow" }).click();
-  await drag(page, at(0.1, 0.35), at(0.6, 0.4));
-  await page.getByRole("button", { name: "Highlight" }).click();
-  await drag(page, at(0.1, 0.6), at(0.7, 0.63));
+  // Draw the way a person does: pick the tool, scroll to where you will draw, then draw.
+  // Clicking a toolbar button can scroll the window, and the mouse can only draw on what is
+  // on screen, so each stroke is brought into view and measured right before it is drawn.
+  const draw = async (tool: string, from: [number, number], to: [number, number]) => {
+    await page.getByRole("button", { name: tool }).click();
+    // Scroll so this stroke sits mid-screen, clear of the sticky header, then measure.
+    const midY = (from[1] + to[1]) / 2;
+    await area.evaluate((el, f) => {
+      const r = el.getBoundingClientRect();
+      window.scrollBy(0, r.top + r.height * f - window.innerHeight / 2);
+    }, midY);
+    const b = (await area.boundingBox())!;
+    const at = ([fx, fy]: [number, number]): [number, number] => [b.x + b.width * fx, b.y + b.height * fy];
+    await drag(page, at(from), at(to));
+  };
+  await draw("Freehand", [0.1, 0.1], [0.4, 0.2]);
+  await draw("Arrow", [0.1, 0.35], [0.6, 0.4]);
+  await draw("Highlight", [0.1, 0.6], [0.7, 0.63]);
   // The highlight is selected after drawing; Delete removes it, undo brings it back.
   await page.keyboard.press("Delete");
   await page.getByRole("button", { name: "Undo" }).click();
