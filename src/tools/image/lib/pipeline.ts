@@ -4,7 +4,7 @@ import type { ProcessInput, ProcessOutput } from "@/lib/engine/types";
 import { throwIfCancelled } from "@/lib/engine/types";
 import { buildOutputName } from "@/lib/files/filename";
 import type { Localized } from "@/lib/i18n";
-import { createCanvas, decodeImage, drawScaled, encodeCanvas, fillBackground, getPixels, releaseCanvas } from "./canvas";
+import { createCanvas, decodeImage, drawScaled, encodeCanvas, fillBackground, pixelSource, releaseCanvas } from "./canvas";
 import { FORMAT_INFO, type OutputFormat } from "./format";
 import type { Size } from "./geometry";
 import { runImageJob } from "./worker-client";
@@ -42,7 +42,7 @@ export async function exportCanvas(
 ): Promise<Blob> {
   if (format === "jpeg") fillBackground(canvas.getContext("2d")!, canvas.width, canvas.height, background);
   if (format === "png") {
-    const result = await runImageJob({ op: "png", px: getPixels(canvas) }, signal);
+    const result = await runImageJob({ op: "png", px: await pixelSource(canvas) }, signal);
     if (result.op !== "png") throw new Error("Unexpected worker result");
     return new Blob([result.bytes as BlobPart], { type: "image/png" });
   }

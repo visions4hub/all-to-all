@@ -44,7 +44,7 @@ export async function pdfToImages(inputs: ProcessInput[], settings: PdfToImageSe
   }
   let doc: Awaited<ReturnType<typeof openPdf>>;
   try {
-    doc = await openPdf(await input.file.arrayBuffer());
+    doc = await openPdf(await input.file.arrayBuffer(), { owned: true });
   } catch (error) {
     throw userError(error instanceof PdfOpenError && error.code === "password" ? PDF_ERRORS.encrypted : PDF_ERRORS.damaged);
   }

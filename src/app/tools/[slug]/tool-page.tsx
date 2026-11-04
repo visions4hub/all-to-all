@@ -7,7 +7,6 @@ import { Container } from "@/components/page-shell";
 import { StatusBadge } from "@/components/status-badge";
 import { ToolGrid } from "@/components/tool-card";
 import { ToolIcon } from "@/components/tool-icon";
-import { ToolWorkspace } from "@/components/workspace/tool-workspace";
 import { Button } from "@/components/ui/button";
 import { KIND_INFO } from "@/lib/files/detect";
 import { useT } from "@/lib/i18n";
@@ -16,12 +15,14 @@ import { useRecentTools } from "@/stores/recent-tools";
 import { getToolLoader } from "@/tools/load";
 import type { ToolModule } from "@/tools/types";
 
+type Workspace = typeof import("@/components/workspace/tool-workspace").ToolWorkspace;
+
 export function ToolPage({ slug }: { slug: string }) {
   const t = useT();
   const tool = getToolBySlug(slug)!;
   const usable = isUsable(tool);
   const markUsed = useRecentTools((s) => s.markUsed);
-  const [mod, setMod] = useState<ToolModule<unknown> | null>(null);
+  const [loaded, setLoaded] = useState<{ mod: ToolModule<unknown>; Workspace: Workspace } | null>(null);
   const [failed, setFailed] = useState(false);
   const loader = usable ? getToolLoader(tool.slug) : undefined;
   // A usable tool without a module is a registry mistake; show the error state rather than spin forever.
@@ -31,8 +32,10 @@ export function ToolPage({ slug }: { slug: string }) {
     if (!usable || !loader) return;
     markUsed(tool.slug);
     let alive = true;
-    loader()
-      .then((m) => alive && setMod(m.default))
+    // The shared workspace (file list, results, ZIP…) loads with the tool's own
+    // code, so it stays out of the page's first bundle.
+    Promise.all([loader(), import("@/components/workspace/tool-workspace")])
+      .then(([m, w]) => alive && setLoaded({ mod: m.default, Workspace: w.ToolWorkspace }))
       .catch(() => alive && setFailed(true));
     return () => {
       alive = false;
@@ -111,12 +114,13 @@ export function ToolPage({ slug }: { slug: string }) {
               en: "This tool failed to load. Check your connection and reload the page.",
             })}
           </div>
-        ) : !mod ? (
-          <div className="flex justify-center py-20">
+        ) : !loaded ? (
+          // Same height as the drop zone that replaces it, so nothing below jumps (CLS).
+          <div className="flex min-h-[268px] items-center justify-center sm:min-h-[300px]">
             <Loader2 className="size-6 animate-spin text-muted-foreground" />
           </div>
         ) : (
-          <ToolWorkspace tool={tool} module={mod} />
+          <loaded.Workspace tool={tool} module={loaded.mod} />
         )}
 
         {related.length > 0 && (

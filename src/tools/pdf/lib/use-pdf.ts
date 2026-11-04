@@ -17,7 +17,7 @@ export type Thumb = { url: string; width: number; height: number };
 function acquire(file: Blob): Entry {
   let entry = docs.get(file);
   if (!entry) {
-    entry = { promise: file.arrayBuffer().then((b) => openPdf(b)), refs: 0, thumbs: new Map() };
+    entry = { promise: file.arrayBuffer().then((b) => openPdf(b, { owned: true })), refs: 0, thumbs: new Map() };
     docs.set(file, entry);
   }
   if (entry.timer) clearTimeout(entry.timer);

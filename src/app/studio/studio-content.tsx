@@ -71,7 +71,7 @@ export function StudioContent() {
             {active && (
               <section className="grid grid-cols-[minmax(0,1fr)] gap-4 xl:grid-cols-[minmax(0,1fr)_300px]">
                 <div className="rounded-2xl border bg-card p-3">
-                  <FileThumb file={active} fit="contain" className="aspect-[4/3] w-full rounded-xl" />
+                  <FileThumb file={active} fit="contain" full className="aspect-[4/3] w-full rounded-xl" />
                   <p dir="auto" className="mt-3 truncate px-1 font-medium">
                     {active.name}
                   </p>
