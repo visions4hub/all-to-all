@@ -1,4 +1,4 @@
-<p align="center"><img src="public/icon.svg" width="96" alt="All To All logo" /></p>
+<p align="center"><img src="public/brand/mark.png" width="140" alt="All To All logo" /><br/><img src="public/brand/wordmark.png" width="360" alt="All To All — By Visions" /></p>
 
 # All To All — By Visions
 

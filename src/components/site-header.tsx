@@ -3,17 +3,11 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Check, Menu, Monitor, Moon, Sun } from "lucide-react";
+import { Menu } from "lucide-react";
 import { BrandLogo } from "@/components/brand";
 import { ToolSearchButton } from "@/components/tool-search";
 import { Container } from "@/components/page-shell";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { usePrefs, useT, type Localized } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
@@ -50,36 +44,6 @@ export function LanguageToggle({ className }: { className?: string }) {
   );
 }
 
-export function ThemeToggle() {
-  const t = useT();
-  const theme = usePrefs((s) => s.theme);
-  const setTheme = usePrefs((s) => s.setTheme);
-  const options = [
-    { value: "light", icon: Sun, label: { ar: "فاتح", en: "Light" } },
-    { value: "dark", icon: Moon, label: { ar: "داكن", en: "Dark" } },
-    { value: "system", icon: Monitor, label: { ar: "حسب الجهاز", en: "System" } },
-  ] as const;
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="size-9 rounded-xl" aria-label={t({ ar: "المظهر", en: "Theme" })}>
-          <Sun className="size-[18px] dark:hidden" />
-          <Moon className="hidden size-[18px] dark:block" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="min-w-36">
-        {options.map((o) => (
-          <DropdownMenuItem key={o.value} onClick={() => setTheme(o.value)}>
-            <o.icon className="size-4" />
-            <span className="flex-1">{t(o.label)}</span>
-            {theme === o.value && <Check className="size-4 text-primary" />}
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-}
-
 export function SiteHeader() {
   const t = useT();
   const pathname = usePathname();
@@ -107,7 +71,6 @@ export function SiteHeader() {
         <div className="ms-auto flex items-center gap-1.5">
           <ToolSearchButton />
           <LanguageToggle />
-          <ThemeToggle />
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="size-9 rounded-xl lg:hidden" aria-label={t({ ar: "القائمة", en: "Menu" })}>

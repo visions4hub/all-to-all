@@ -17,7 +17,6 @@ import {
 } from "lucide-react";
 import { BrandMark } from "@/components/brand";
 import { SmartUpload } from "@/components/files/smart-upload";
-import { Reveal } from "@/components/reveal";
 import { Container } from "@/components/page-shell";
 import { ToolCard, ToolGrid } from "@/components/tool-card";
 import { WorkflowPresetList } from "@/components/workflow-presets";
@@ -31,7 +30,7 @@ function SectionHeader({ title, description, href, linkLabel }: { title: Localiz
   const t = useT();
   const Arrow = useLocale() === "ar" ? ArrowLeft : ArrowRight;
   return (
-    <Reveal className="mb-7 flex flex-wrap items-end justify-between gap-3">
+    <div className="mb-7 flex flex-wrap items-end justify-between gap-3">
       <div>
         <span className="mb-3 block h-px w-12 bg-gold" aria-hidden />
         <h2 className="text-2xl font-bold sm:text-3xl">{t(title)}</h2>
@@ -40,10 +39,10 @@ function SectionHeader({ title, description, href, linkLabel }: { title: Localiz
       {href && linkLabel && (
         <Link href={href} className="group inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline">
           {t(linkLabel)}
-          <Arrow className="size-4 transition-transform group-hover:-translate-x-0.5 ltr:group-hover:translate-x-0.5" />
+          <Arrow className="size-4" />
         </Link>
       )}
-    </Reveal>
+    </div>
   );
 }
 
@@ -121,7 +120,7 @@ export function HomeContent() {
       <section className="relative overflow-hidden border-b">
         <HeroLines />
         <Container className="relative py-14 text-center sm:py-20">
-          <BrandMark animated className="mx-auto mb-7 size-20 sm:size-24" />
+          <BrandMark className="mx-auto mb-7 h-32 sm:h-40" />
           <p className="mx-auto mb-5 inline-flex items-center gap-2 rounded-full border border-gold/30 bg-card/70 px-3.5 py-1.5 text-xs font-medium text-muted-foreground backdrop-blur">
             <ShieldCheck className="size-4 text-gold" />
             {t({ ar: "معالجة كاملة داخل متصفحك", en: "Processed entirely in your browser" })}
@@ -130,12 +129,12 @@ export function HomeContent() {
             {locale === "ar" ? (
               <>
                 <span className="inline-block">كل ملفاتك.</span> <span className="inline-block">كل أدواتك.</span>{" "}
-                <span className="text-gold-shine inline-block">بمكان واحد.</span>
+                <span className="inline-block text-gold">بمكان واحد.</span>
               </>
             ) : (
               <>
                 <span className="inline-block">Every File.</span> <span className="inline-block">Every Tool.</span>{" "}
-                <span className="text-gold-shine inline-block">One Place.</span>
+                <span className="inline-block text-gold">One Place.</span>
               </>
             )}
           </h1>

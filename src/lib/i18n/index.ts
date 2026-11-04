@@ -10,9 +10,7 @@ export const DEFAULT_LOCALE: Locale = "ar";
 
 type PrefsState = {
   locale: Locale;
-  theme: "light" | "dark" | "system";
   setLocale: (locale: Locale) => void;
-  setTheme: (theme: "light" | "dark" | "system") => void;
 };
 
 /** Browser-only preferences. Stored in localStorage under "ata-prefs". */
@@ -20,9 +18,7 @@ export const usePrefs = create<PrefsState>()(
   persist(
     (set) => ({
       locale: DEFAULT_LOCALE,
-      theme: "dark",
       setLocale: (locale) => set({ locale }),
-      setTheme: (theme) => set({ theme }),
     }),
     {
       name: "ata-prefs",

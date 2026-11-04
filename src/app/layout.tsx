@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Cinzel, IBM_Plex_Sans_Arabic, Readex_Pro } from "next/font/google";
+import { IBM_Plex_Sans_Arabic, Readex_Pro } from "next/font/google";
 import { AppProviders } from "@/components/app-providers";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
@@ -21,14 +21,6 @@ const display = Readex_Pro({
   display: "swap",
 });
 
-// Classic serif capitals for the "ALL TO ALL" wordmark only.
-const brandSerif = Cinzel({
-  variable: "--font-serif-brand",
-  subsets: ["latin"],
-  weight: ["500", "600"],
-  display: "swap",
-});
-
 export const metadata: Metadata = {
   title: {
     default: "All To All — كل ملفاتك. كل أدواتك. بمكان واحد.",
@@ -38,7 +30,13 @@ export const metadata: Metadata = {
     "أدوات احترافية لتحويل وتعديل وتنظيم ملفات PDF والصور داخل متصفحك. مجاناً، بدون تسجيل، وبدون رفع ملفاتك إلى أي خادم.",
   applicationName: "All To All",
   authors: [{ name: "Visions" }],
-  icons: { icon: "/icon.svg" },
+  icons: {
+    icon: [
+      { url: "/icon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 export const viewport: Viewport = {
@@ -50,13 +48,13 @@ export const viewport: Viewport = {
   ],
 };
 
-// Runs before first paint: applies the saved language/direction and theme so
-// returning visitors don't see a flash of the wrong layout or colors.
-const prefsScript = `(function(){try{var p=JSON.parse(localStorage.getItem('ata-prefs')||'{}').state||{};var l=p.locale==='en'?'en':'ar';var d=document.documentElement;d.lang=l;d.dir=l==='ar'?'rtl':'ltr';var t=p.theme||'dark';d.classList.add('motion-ready');var dark=t==='dark'||(t==='system'&&matchMedia('(prefers-color-scheme: dark)').matches);if(dark)d.classList.add('dark');}catch(e){}})();`;
+// Runs before first paint: applies the saved language/direction so returning
+// visitors don't see a flash of the wrong layout.
+const prefsScript = `(function(){try{var p=JSON.parse(localStorage.getItem('ata-prefs')||'{}').state||{};var l=p.locale==='en'?'en':'ar';var d=document.documentElement;d.lang=l;d.dir=l==='ar'?'rtl':'ltr';}catch(e){}})();`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ar" dir="rtl" className={`${body.variable} ${display.variable} ${brandSerif.variable} h-full antialiased`} suppressHydrationWarning>
+    <html lang="ar" dir="rtl" className={`${body.variable} ${display.variable} dark h-full antialiased`} style={{ colorScheme: "dark" }} suppressHydrationWarning>
       <head>
         {/* First in <head> so it covers everything after it; works on hosts that can't set headers. */}
         <meta httpEquiv="Content-Security-Policy" content={META_CSP} />
