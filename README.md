@@ -2,6 +2,8 @@
 
 **كل ملفاتك. كل أدواتك. بمكان واحد. · Every File. Every Tool. One Place.**
 
+**Live:** https://all-to-all.pages.dev
+
 A free PDF and image toolbox that runs entirely in the browser. No accounts, no uploads, no subscriptions, no ads, no usage quotas. Arabic first (RTL), with English (LTR).
 
 ## Run it

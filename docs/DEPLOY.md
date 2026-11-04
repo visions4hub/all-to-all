@@ -2,6 +2,19 @@
 
 The site is a static export: `npm run build` writes plain files to `out/`. No server, database, functions or paid service is needed. Pick any static host.
 
+## Live site
+
+**https://all-to-all.pages.dev** — Cloudflare Pages project `all-to-all` (Direct Upload), first deployed 4 November 2026.
+
+To publish a new version from this repository (after `npx wrangler login` once on the machine):
+
+```bash
+npm run build
+npx wrangler@4 pages deploy out --project-name all-to-all --branch main
+```
+
+The project was created as Direct Upload, so pushing to GitHub does not redeploy by itself. To deploy automatically on every push, add a GitHub Actions step that runs the command above with a Cloudflare API token stored as a repository secret (`CLOUDFLARE_API_TOKEN`, scoped to "Cloudflare Pages: Edit", plus `CLOUDFLARE_ACCOUNT_ID`).
+
 ## Recommended: Cloudflare Pages (free plan)
 
 1. Push the repository to GitHub.
