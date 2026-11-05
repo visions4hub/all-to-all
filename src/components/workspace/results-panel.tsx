@@ -79,18 +79,26 @@ export function ResultsPanel({
   };
 
   return (
-    <section className="rounded-2xl border bg-card p-4 shadow-soft sm:p-6" aria-live="polite">
-      <div className="flex flex-wrap items-center gap-3">
+    <section
+      className={cn(
+        "rounded-3xl border p-4 shadow-lift sm:p-7",
+        outputs.length
+          ? "border-gold/45 bg-[radial-gradient(120%_160%_at_100%_0%,#1d1910_0%,#100e0a_65%)]"
+          : "bg-card",
+      )}
+      aria-live="polite"
+    >
+      <div className="flex flex-wrap items-center gap-4">
         <span
           className={cn(
-            "flex size-10 items-center justify-center rounded-full",
-            outputs.length ? "bg-brand-soft text-gold ring-1 ring-gold/25 ring-inset" : "bg-destructive/10 text-destructive",
+            "flex size-12 shrink-0 items-center justify-center rounded-full sm:size-14",
+            outputs.length ? "bg-success/12 text-success ring-1 ring-success/40 ring-inset" : "bg-destructive/10 text-destructive",
           )}
         >
-          {outputs.length ? <CheckCircle2 className="size-5" /> : <AlertCircle className="size-5" />}
+          {outputs.length ? <CheckCircle2 className="size-6 sm:size-7" /> : <AlertCircle className="size-6" />}
         </span>
-        <div className="me-auto">
-          <h2 className="text-lg font-semibold">
+        <div className="me-auto min-w-0">
+          <h2 className="text-2xl font-bold sm:text-3xl">
             {outputs.length
               ? t({ ar: "ملفاتك جاهزة", en: "Your files are ready" })
               : result.cancelled
@@ -106,7 +114,7 @@ export function ResultsPanel({
         </div>
         <div className="flex w-full flex-wrap gap-2 sm:w-auto">
           {outputs.length > 1 && (
-            <Button onClick={downloadZip} disabled={zipping !== null} className="h-10 flex-1 rounded-xl sm:flex-none">
+            <Button onClick={downloadZip} disabled={zipping !== null} className="h-12 flex-1 rounded-xl px-6 text-base font-bold sm:flex-none">
               {zipping !== null ? <Loader2 className="animate-spin" /> : <FileArchive />}
               {zipping !== null
                 ? t({ ar: `جارٍ التجميع ${Math.round(zipping)}%`, en: `Zipping ${Math.round(zipping)}%` })
@@ -114,18 +122,18 @@ export function ResultsPanel({
             </Button>
           )}
           {outputs.length === 1 && (
-            <Button onClick={() => downloadBlob(outputs[0].blob, finalName(0))} className="h-10 flex-1 rounded-xl sm:flex-none">
+            <Button onClick={() => downloadBlob(outputs[0].blob, finalName(0))} className="h-12 flex-1 rounded-xl px-6 text-base font-bold sm:flex-none">
               <Download />
               {t({ ar: "تنزيل", en: "Download" })}
             </Button>
           )}
           {canShare && outputs.length > 0 && (
-            <Button variant="outline" className="h-10 rounded-xl" onClick={() => void shareFiles(named())}>
+            <Button variant="outline" className="h-12 rounded-xl" onClick={() => void shareFiles(named())}>
               <Share2 />
               {t({ ar: "مشاركة", en: "Share" })}
             </Button>
           )}
-          <Button variant="ghost" className="h-10 rounded-xl" onClick={onReset}>
+          <Button variant="outline" className="h-12 rounded-xl border-gold/25" onClick={onReset}>
             <RotateCcw />
             {t({ ar: "معالجة جديدة", en: "Start over" })}
           </Button>

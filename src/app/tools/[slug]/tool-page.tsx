@@ -12,6 +12,8 @@ import { KIND_INFO } from "@/lib/files/detect";
 import { useT } from "@/lib/i18n";
 import { getToolBySlug, isUsable, toolsInCategory } from "@/lib/tools/registry";
 import { useRecentTools } from "@/stores/recent-tools";
+import { useWorkspace } from "@/stores/workspace";
+import { cn } from "@/lib/utils";
 import { getToolLoader } from "@/tools/load";
 import type { ToolModule } from "@/tools/types";
 
@@ -22,6 +24,8 @@ export function ToolPage({ slug }: { slug: string }) {
   const tool = getToolBySlug(slug)!;
   const usable = isUsable(tool);
   const markUsed = useRecentTools((s) => s.markUsed);
+  // Once files are in, the header shrinks to one line so the workspace fits on screen.
+  const compact = useWorkspace((s) => s.files.length > 0) && usable;
   const [loaded, setLoaded] = useState<{ mod: ToolModule<unknown>; Workspace: Workspace } | null>(null);
   const [failed, setFailed] = useState(false);
   const loader = usable ? getToolLoader(tool.slug) : undefined;
@@ -48,8 +52,8 @@ export function ToolPage({ slug }: { slug: string }) {
   return (
     <>
       <section className="border-b bg-[#0d0c09]">
-        <Container className="py-8 sm:py-10">
-          <nav className="mb-6 flex flex-wrap items-center gap-2 text-[13px] text-muted-foreground" aria-label={t({ ar: "مسار التنقل", en: "Breadcrumb" })}>
+        <Container className={compact ? "py-3.5" : "py-8 sm:py-10"}>
+          <nav className={cn("flex flex-wrap items-center gap-2 text-[13px] text-muted-foreground", compact ? "sr-only" : "mb-6")} aria-label={t({ ar: "مسار التنقل", en: "Breadcrumb" })}>
             <Link href="/tools/" className="hover:text-foreground">
               {t({ ar: "الأدوات", en: "Tools" })}
             </Link>
@@ -62,22 +66,30 @@ export function ToolPage({ slug }: { slug: string }) {
               {t(tool.name)}
             </span>
           </nav>
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-4">
-            <ToolIcon name={tool.icon} category={tool.category} size="lg" className="size-15 [&_svg]:size-7" />
+          <div className={cn("flex flex-wrap items-center", compact ? "gap-x-4 gap-y-2" : "gap-x-5 gap-y-4")}>
+            {compact ? (
+              <ToolIcon name={tool.icon} category={tool.category} size="sm" className="size-10 [&_svg]:size-5" />
+            ) : (
+              <ToolIcon name={tool.icon} category={tool.category} size="lg" className="size-15 [&_svg]:size-7" />
+            )}
             <div className="min-w-0 flex-[1_1_18rem]">
               <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-3xl font-bold sm:text-4xl">{t(tool.name)}</h1>
+                <h1 className={compact ? "text-2xl font-bold" : "text-3xl font-bold sm:text-4xl"}>{t(tool.name)}</h1>
                 {tool.status !== "operational" && <StatusBadge status={tool.status} />}
               </div>
-              <p className="mt-1 max-w-2xl text-muted-foreground">{t(tool.description)}</p>
+              <p className={compact ? "sr-only" : "mt-1 max-w-2xl text-muted-foreground"}>{t(tool.description)}</p>
             </div>
             <ul className="flex flex-wrap gap-2 text-xs text-muted-foreground">
-              <li className="rounded-full border px-3 py-1.5">
-                {t({ ar: "الصيغ المقبولة:", en: "Accepts:" })} <span dir="ltr">{formats}</span>
-              </li>
-              <li className="rounded-full border px-3 py-1.5">
-                {t({ ar: "الناتج:", en: "Output:" })} <span dir="ltr">{tool.outputs.join(" · ")}</span>
-              </li>
+              {!compact && (
+                <>
+                  <li className="rounded-full border px-3 py-1.5">
+                    {t({ ar: "الصيغ المقبولة:", en: "Accepts:" })} <span dir="ltr">{formats}</span>
+                  </li>
+                  <li className="rounded-full border px-3 py-1.5">
+                    {t({ ar: "الناتج:", en: "Output:" })} <span dir="ltr">{tool.outputs.join(" · ")}</span>
+                  </li>
+                </>
+              )}
               <li className="inline-flex items-center gap-1.5 rounded-full border border-gold/30 px-3 py-1.5 text-gold">
                 <ShieldCheck className="size-3.5" />
                 {t({ ar: "بدون رفع ملفات", en: "No uploads" })}
@@ -93,7 +105,7 @@ export function ToolPage({ slug }: { slug: string }) {
         </Container>
       </section>
 
-      <Container className="py-8">
+      <Container className={compact ? "py-5" : "py-8"}>
         {!usable ? (
           <div className="mx-auto max-w-xl rounded-2xl border bg-card p-8 text-center shadow-soft">
             <span className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-muted text-muted-foreground">

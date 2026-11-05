@@ -40,6 +40,7 @@ export function ToolWorkspace<S>({ tool, module }: { tool: ToolDefinition; modul
   const [result, setResult] = useState<RunResult | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
+  const outcomeRef = useRef<HTMLDivElement>(null);
 
   const active = accepted.find((f) => f.id === selectedId) ?? accepted[0];
   const filesToUse = tool.maxFiles ? accepted.slice(0, tool.maxFiles) : accepted;
@@ -61,6 +62,14 @@ export function ToolWorkspace<S>({ tool, module }: { tool: ToolDefinition; modul
   const peakMemory = estimatePeakMemory(filesToUse, module.mode);
   const heavy = memoryLevel(peakMemory, memoryBudget(deviceMemoryGB())) === "high";
 
+  // Bring progress and the result into view as soon as they appear, so nobody has to look for them.
+  const showing = running || !!result;
+  useEffect(() => {
+    if (!showing) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    outcomeRef.current?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+  }, [showing, result]);
+
   const start = async () => {
     if (problem || running) return;
     const controller = new AbortController();
@@ -81,6 +90,22 @@ export function ToolWorkspace<S>({ tool, module }: { tool: ToolDefinition; modul
       abortRef.current = null;
     }
   };
+
+  // Ctrl/Cmd + Enter runs the tool from anywhere on the page.
+  const startRef = useRef(start);
+  useEffect(() => {
+    startRef.current = start;
+  });
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Enter" && (e.ctrlKey || e.metaKey) && !e.repeat) {
+        e.preventDefault();
+        void startRef.current();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   const settingsPanel = module.Settings ? (
     <module.Settings settings={settings} onChange={setSettings} files={filesToUse} activeFile={active} disabled={running} />
@@ -130,9 +155,48 @@ export function ToolWorkspace<S>({ tool, module }: { tool: ToolDefinition; modul
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-[300px_minmax(0,1fr)_320px] lg:items-start">
+      {/* Progress and results sit on top: the page scrolls here when a run starts and ends. */}
+      {(running || result) && (
+        <div ref={outcomeRef} className="scroll-mt-24 space-y-6">
+          {running && progress && (
+            <div className="rounded-2xl border bg-card p-4" role="status">
+              <div className="mb-2 flex items-center gap-2 text-sm">
+                <Loader2 className="size-4 animate-spin text-primary" />
+                <span className="me-auto">
+                  {t({ ar: "جارٍ المعالجة…", en: "Processing…" })}
+                  {progress.label && (
+                    <span dir="auto" className="ms-2 text-muted-foreground">
+                      {progress.label}
+                    </span>
+                  )}
+                </span>
+                <span dir="ltr" className="text-muted-foreground">
+                  {formatNumber(progress.done)} / {formatNumber(progress.total)}
+                </span>
+              </div>
+              <Progress value={progress.total ? (progress.done / progress.total) * 100 : 0} />
+            </div>
+          )}
+
+          {result && (
+            <ResultsPanel
+              result={result}
+              sources={accepted}
+              zipName={buildOutputName(accepted[0]?.name ?? "all-to-all", { suffix: tool.slug, ext: "zip" })}
+              onReset={() => setResult(null)}
+            />
+          )}
+        </div>
+      )}
+
+      <div
+        className={cn(
+          "grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-[300px_minmax(0,1fr)_340px] lg:items-start",
+          result && !running && "opacity-60 transition-opacity focus-within:opacity-100 hover:opacity-100",
+        )}
+      >
         {/* Files */}
-        <aside className="order-2 space-y-3 rounded-2xl border bg-card p-3 lg:order-1 lg:sticky lg:top-20">
+        <aside className="order-2 space-y-3 rounded-2xl border bg-card p-3 lg:order-1 lg:sticky lg:top-22">
           <FileListToolbar count={allFiles.length} totalSize={allFiles.reduce((n, f) => n + f.size, 0)} />
           <FileList
             files={allFiles}
@@ -182,48 +246,26 @@ export function ToolWorkspace<S>({ tool, module }: { tool: ToolDefinition; modul
         </section>
 
         {/* Settings (desktop) */}
-        <aside className="order-3 hidden space-y-4 rounded-2xl border bg-card p-4 lg:sticky lg:top-20 lg:block">
-          <h2 className="flex items-center gap-2 font-semibold">
+        <aside className="order-3 hidden max-h-[calc(100vh-6.5rem)] flex-col overflow-hidden rounded-2xl border bg-card lg:sticky lg:top-22 lg:flex">
+          <h2 className="flex items-center gap-2 border-b px-4 py-3.5 font-semibold">
             <Settings2 className="size-4 text-primary" />
             {t({ ar: "الإعدادات", en: "Settings" })}
           </h2>
-          {settingsPanel}
-          {actionButton}
-          <p className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
-            <ShieldCheck className="size-3.5 text-gold" />
-            {t({ ar: "تتم المعالجة على جهازك", en: "Processed on your device" })}
-          </p>
+          {settingsPanel && <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4">{settingsPanel}</div>}
+          {/* The action stays on screen however long the settings are. */}
+          <div className="space-y-2 border-t bg-[#15120d] p-4">
+            {actionButton}
+            <p className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
+              <ShieldCheck className="size-3.5 text-gold" />
+              {t({ ar: "تتم المعالجة على جهازك", en: "Processed on your device" })}
+              <span aria-hidden>·</span>
+              <kbd dir="ltr" className="rounded border px-1 font-sans text-[11px]">
+                Ctrl Enter
+              </kbd>
+            </p>
+          </div>
         </aside>
       </div>
-
-      {running && progress && (
-        <div className="rounded-2xl border bg-card p-4" role="status">
-          <div className="mb-2 flex items-center gap-2 text-sm">
-            <Loader2 className="size-4 animate-spin text-primary" />
-            <span className="me-auto">
-              {t({ ar: "جارٍ المعالجة…", en: "Processing…" })}
-              {progress.label && (
-                <span dir="auto" className="ms-2 text-muted-foreground">
-                  {progress.label}
-                </span>
-              )}
-            </span>
-            <span dir="ltr" className="text-muted-foreground">
-              {formatNumber(progress.done)} / {formatNumber(progress.total)}
-            </span>
-          </div>
-          <Progress value={progress.total ? (progress.done / progress.total) * 100 : 0} />
-        </div>
-      )}
-
-      {result && (
-        <ResultsPanel
-          result={result}
-          sources={accepted}
-          zipName={buildOutputName(accepted[0]?.name ?? "all-to-all", { suffix: tool.slug, ext: "zip" })}
-          onReset={() => setResult(null)}
-        />
-      )}
 
       {/* Mobile: sticky action bar + settings bottom sheet */}
       <div className="sticky bottom-0 z-30 -mx-4 border-t bg-background/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur lg:hidden">

@@ -33,7 +33,7 @@ export function FileFacts({ file, className }: { file: WorkspaceFile; className?
   if (file.pageCount) parts.push(t({ ar: `${formatNumber(file.pageCount)} صفحة`, en: `${formatNumber(file.pageCount)} pages` }));
   if (file.width && file.height) parts.push(`${file.width}×${file.height}`);
   return (
-    <p className={cn("truncate text-xs text-muted-foreground", className)}>
+    <p className={cn("text-xs leading-5 text-muted-foreground", className)}>
       <span dir="ltr" className="ltr-isolate">{parts.join(" · ")}</span>
       {file.previewError && <span className="ms-1.5 text-destructive">— {t(PREVIEW_ERRORS[file.previewError] ?? PREVIEW_ERRORS.unknown)}</span>}
     </p>
@@ -173,7 +173,7 @@ export function FileListToolbar({ count, totalSize }: { count: number; totalSize
   const clear = useWorkspace((s) => s.clear);
   return (
     <div className="flex items-center gap-2">
-      <p className="me-auto text-sm text-muted-foreground">
+      <p className="me-auto text-sm whitespace-nowrap text-muted-foreground">
         {t({ ar: `${formatNumber(count)} ملف`, en: `${formatNumber(count)} file${count === 1 ? "" : "s"}` })}
         <span className="mx-1.5">·</span>
         <span dir="ltr">{formatBytes(totalSize)}</span>

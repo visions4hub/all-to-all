@@ -2,6 +2,8 @@
 
 import { Container, PageHero } from "@/components/page-shell";
 import { ToolDirectory } from "@/components/tool-directory";
+import { formatNumber } from "@/lib/files/format";
+import { ALL_TOOLS } from "@/lib/tools/registry";
 import type { ToolCategory } from "@/lib/tools/types";
 
 const COPY = {
@@ -30,10 +32,11 @@ const COPY = {
 
 export function DirectoryPage({ category }: { category?: ToolCategory }) {
   const copy = COPY[category ?? "all"];
+  const count = formatNumber(category ? ALL_TOOLS.filter((x) => x.category === category).length : ALL_TOOLS.length);
   return (
     <>
-      <PageHero title={copy.title} description={copy.description} />
-      <Container className="py-10">
+      <PageHero eyebrow={{ ar: `${count} أداة جاهزة`, en: `${count} ready tools` }} title={copy.title} description={copy.description} />
+      <Container className="pt-2 pb-10">
         <ToolDirectory category={category} />
       </Container>
     </>
