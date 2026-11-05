@@ -47,38 +47,42 @@ export function ToolPage({ slug }: { slug: string }) {
 
   return (
     <>
-      <section className="border-b bg-card/60">
+      <section className="border-b bg-[#0d0c09]">
         <Container className="py-8 sm:py-10">
-          <nav className="mb-5 text-sm text-muted-foreground" aria-label={t({ ar: "مسار التنقل", en: "Breadcrumb" })}>
+          <nav className="mb-6 flex flex-wrap items-center gap-2 text-[13px] text-muted-foreground" aria-label={t({ ar: "مسار التنقل", en: "Breadcrumb" })}>
             <Link href="/tools/" className="hover:text-foreground">
               {t({ ar: "الأدوات", en: "Tools" })}
             </Link>
-            <span className="mx-2">/</span>
+            <span aria-hidden>/</span>
             <Link href={tool.category === "pdf" ? "/pdf/" : "/image/"} className="hover:text-foreground">
               {tool.category === "pdf" ? "PDF" : t({ ar: "الصور", en: "Images" })}
             </Link>
+            <span aria-hidden>/</span>
+            <span className="text-foreground/85" aria-current="page">
+              {t(tool.name)}
+            </span>
           </nav>
-          <div className="flex items-start gap-4">
-            <ToolIcon name={tool.icon} category={tool.category} size="lg" />
-            <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-4">
+            <ToolIcon name={tool.icon} category={tool.category} size="lg" className="size-15 [&_svg]:size-7" />
+            <div className="min-w-0 flex-[1_1_18rem]">
               <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-2xl font-bold sm:text-3xl">{t(tool.name)}</h1>
+                <h1 className="text-3xl font-bold sm:text-4xl">{t(tool.name)}</h1>
                 {tool.status !== "operational" && <StatusBadge status={tool.status} />}
               </div>
-              <p className="mt-2 max-w-2xl text-muted-foreground">{t(tool.description)}</p>
-              <p className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                <span>
-                  {t({ ar: "الصيغ المقبولة:", en: "Accepts:" })} <span dir="ltr">{formats}</span>
-                </span>
-                <span>
-                  {t({ ar: "الناتج:", en: "Output:" })} <span dir="ltr">{tool.outputs.join(" · ")}</span>
-                </span>
-                <span className="inline-flex items-center gap-1 text-gold">
-                  <ShieldCheck className="size-3.5" />
-                  {t({ ar: "بدون رفع ملفات", en: "No uploads" })}
-                </span>
-              </p>
+              <p className="mt-1 max-w-2xl text-muted-foreground">{t(tool.description)}</p>
             </div>
+            <ul className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+              <li className="rounded-full border px-3 py-1.5">
+                {t({ ar: "الصيغ المقبولة:", en: "Accepts:" })} <span dir="ltr">{formats}</span>
+              </li>
+              <li className="rounded-full border px-3 py-1.5">
+                {t({ ar: "الناتج:", en: "Output:" })} <span dir="ltr">{tool.outputs.join(" · ")}</span>
+              </li>
+              <li className="inline-flex items-center gap-1.5 rounded-full border border-gold/30 px-3 py-1.5 text-gold">
+                <ShieldCheck className="size-3.5" />
+                {t({ ar: "بدون رفع ملفات", en: "No uploads" })}
+              </li>
+            </ul>
           </div>
           {tool.note && (
             <p className="mt-5 flex max-w-3xl items-start gap-2 rounded-xl border border-warning/30 bg-warning/8 p-3 text-sm">

@@ -52,7 +52,7 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background/85 backdrop-blur-md supports-[backdrop-filter]:bg-background/70">
-      <Container className="flex h-16 items-center gap-3">
+      <Container className="flex h-[72px] items-center gap-3">
         <BrandLogo />
         <nav className="ms-6 hidden items-center gap-1 lg:flex" aria-label={t({ ar: "التنقل الرئيسي", en: "Main" })}>
           {NAV_LINKS.slice(0, 5).map((link) => (
@@ -60,8 +60,8 @@ export function SiteHeader() {
               key={link.href}
               href={link.href}
               className={cn(
-                "rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground",
-                isActive(pathname, link.href) && "bg-accent text-accent-foreground",
+                "rounded-lg px-3 py-2 text-[15px] font-medium text-foreground/70 transition-colors hover:text-foreground",
+                isActive(pathname, link.href) && "text-gold hover:text-gold",
               )}
             >
               {t(link.label)}
