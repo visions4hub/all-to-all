@@ -166,8 +166,9 @@ export function HomeContent() {
               ].map((x, i) => (
                 <div key={i} className={i > 0 ? "border-s ps-4 sm:ps-6" : "pe-4 sm:pe-6"}>
                   <dt className="text-[13px] text-muted-foreground">{t(x.label)}</dt>
-                  <dd className={`mt-0.5 font-heading text-3xl font-bold ${x.gold ? "text-gold" : ""}`} dir={x.ltr ? "ltr" : undefined}>
-                    {x.value}
+                  {/* Only the number is isolated as LTR, so it still sits at the cell's start like its label. */}
+                  <dd className={`mt-0.5 font-heading text-3xl font-bold ${x.gold ? "text-gold" : ""}`}>
+                    {x.ltr ? <span dir="ltr">{x.value}</span> : x.value}
                   </dd>
                 </div>
               ))}
